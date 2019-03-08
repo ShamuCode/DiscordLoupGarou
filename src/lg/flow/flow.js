@@ -262,18 +262,18 @@ class GameFlow extends IGame {
                 this.gameStats.setImage(lg_var.roles_img.JoueurDeFlute);
                 this.gameStats.setColor("GOLD");
                 await this.fillGameStats();
-                this.gameStats.setDescription(`Vainqueur : __**${this.GameConfiguration.JoueurDeFlute.member.displayName}**__`);
+                this.gameStats.setDescription(`Vainqueur : __**${this.GameConfiguration.joueurDeFlute.member.displayName}**__`);
 
                 return true;
             }
 
-            if (this.GameConfiguration.charmedPlayers.length === alivePlayers.length - 2 && this.GameConfiguration.JoueurDeFlute.amoureux && !this.GameConfiguration._players.get(this.GameConfiguration.JoueurDeFlute.amoureux).charmed) {
+            if (this.GameConfiguration.charmedPlayers.length === alivePlayers.length - 2 && this.GameConfiguration.joueurDeFlute.amoureux && !this.GameConfiguration._players.get(this.GameConfiguration.joueurDeFlute.amoureux).charmed) {
 
                 this.gameStats.setTitle("Le joueur de Flute et son amoureux/se ont gagné !");
                 this.gameStats.setImage(lg_var.roles_img.JoueurDeFlute);
                 this.gameStats.setColor("GOLD");
                 await this.fillGameStats();
-                this.gameStats.setDescription(`Vainqueurs : __**${this.GameConfiguration.JoueurDeFlute.member.displayName}**__ 💗  __**${this.GameConfiguration._players.get(this.GameConfiguration.JoueurDeFlute.amoureux).member.displayName}**__`);
+                this.gameStats.setDescription(`Vainqueurs : __**${this.GameConfiguration.joueurDeFlute.member.displayName}**__ 💗  __**${this.GameConfiguration._players.get(this.GameConfiguration.joueurDeFlute.amoureux).member.displayName}**__`);
 
                 return true;
             }

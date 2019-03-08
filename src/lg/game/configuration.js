@@ -64,10 +64,22 @@ class GameConfiguration {
 
     }
 
-    get JoueurDeFlute() {
+    get joueurDeFlute() {
 
         for (let player of this._players.values()) {
             if (player.role === "JoueurDeFlute") {
+                return player;
+            }
+        }
+
+        return null;
+
+    }
+
+    get boucEmissaire() {
+
+        for (let player of this._players.values()) {
+            if (player.role === "BoucEmissaire") {
                 return player;
             }
         }

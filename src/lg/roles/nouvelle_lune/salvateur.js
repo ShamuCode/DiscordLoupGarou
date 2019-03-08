@@ -27,9 +27,9 @@ class Salvateur extends Villageois {
 
         let dmChannel = await this.getDMChannel();
 
-        let exceptionIdArray = [this.member.id];
+        let exceptionIdArray = [];
 
-        if (this.lastTargetId && this.lastTargetId !== this.member.id) {
+        if (this.lastTargetId) {
             exceptionIdArray.push(this.lastTargetId);
         }
 

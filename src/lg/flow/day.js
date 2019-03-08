@@ -95,40 +95,27 @@ class Day extends Period {
 
         } else if (outcome.length > 1) {
 
-            // more than one victim voted, the capitaine must make a decision
-            // if no capitaine, random victim
-            // if capitaine refuse to make a decision, pick a random victim
+            let boucEmissaire = this.GameConfiguration.boucEmissaire;
 
-            let capitaine = this.GameConfiguration.Capitaine;
+            if (boucEmissaire) {
 
-            if (capitaine && capitaine.alive) {
+                await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+                    "Le vote du village est nul, le bouc émissaire va devoir en subir les conséquences !\n" +
+                    "Il est donc éliminé, mais il lui reste une prérogative à exercer. Il va maintenant désigner qui votera ou ne votera pas durant la prochaine journée..."
+                );
 
-                await this.GameConfiguration.channelsHandler.sendMessageToVillage("Le vote est nul, le Capitaine va devoir trancher");
-
-                victimId = await new Promise((resolve, reject) => {
-                    capitaine.getDMChannel()
-                        .then(dmChannel => new EveryOneVote(
-                            "Qui doit mourir ?",
-                            this.GameConfiguration,
-                            30000,
-                            dmChannel,
-                            1
-                        ).excludeDeadPlayers().runVote(
-                            this.GameConfiguration.getAlivePlayers().filter(p => !outcome.includes(p.member.id))
-                        ))
-                        .then(capitaineDecision => {
-                            if (!capitaineDecision || capitaineDecision.length === 0) {
-                                resolve(get_random_in_array(outcome));
-                            } else {
-                                resolve(capitaineDecision[0]);
-                            }
-                        })
-                        .catch(err => reject(err));
-                });
+                victimId = await boucEmissaire.processRole(this.GameConfiguration);
 
             } else {
 
-                victimId = get_random_in_array(outcome);
+                let capitaine = this.GameConfiguration.Capitaine;
+
+                if (capitaine && capitaine.alive) {
+                    await this.GameConfiguration.channelsHandler.sendMessageToVillage("Le vote est nul, le Capitaine va devoir trancher");
+                    victimId = await this.askCapitaineToChoose(capitaine, outcome);
+                } else {
+                    victimId = get_random_in_array(outcome);
+                }
 
             }
 
@@ -152,6 +139,29 @@ class Day extends Period {
             return victim;
         }
 
+    }
+
+    askCapitaineToChoose(capitaine, outcome) {
+        return new Promise((resolve, reject) => {
+            capitaine.getDMChannel()
+                .then(dmChannel => new EveryOneVote(
+                    "Qui doit mourir ?",
+                    this.GameConfiguration,
+                    30000,
+                    dmChannel,
+                    1
+                ).excludeDeadPlayers().runVote(
+                    this.GameConfiguration.getAlivePlayers().filter(p => !outcome.includes(p.member.id))
+                ))
+                .then(capitaineDecision => {
+                    if (!capitaineDecision || capitaineDecision.length === 0) {
+                        resolve(get_random_in_array(outcome));
+                    } else {
+                        resolve(capitaineDecision[0]);
+                    }
+                })
+                .catch(err => reject(err));
+        });
     }
 
 }

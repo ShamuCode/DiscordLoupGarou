@@ -13,7 +13,7 @@ class Player {
         this.capitaine = false;
         this.immunity = false;
         this.alive = true;
-        this.voted = false;
+        this.canVote = true;
         this.infected = false;
         this.charmed = false;
         this.amoureux = undefined;
