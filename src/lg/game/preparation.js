@@ -13,6 +13,7 @@ class GamePreparation extends IGame {
         super(client);
 
         this.MAX_PLAYERS = 29;
+        this.MIN_PLAYERS = 2;
 
         this.status = false;
 
@@ -36,34 +37,23 @@ class GamePreparation extends IGame {
 
     }
 
-    prepareGame() {
-        return new Promise((resolve, reject) => {
-            this.init()
-                .then(() => this.createRoles())
-                .then(() => this.displayGuide())
-                .then(() => this.initEvents())
-                .then(status => {
-                    if (!status) return resolve(status);
-                    return this.setupChannels()
-                })
-                .then(() => this.channelsHandler.moveVocalPlayers(this.configuration))
-                .then(() => this.rolesHandler.sendRolesToPlayers(this.configuration))
-                .then(() => resolve(this.configuration))
-                .catch(err => reject(err));
-        });
+    async prepareGame() {
+        await this.init();
+        await this.createRoles();
+        await this.displayGuide();
+
+        let allParticipantsGathered = await this.gatherParticipants();
+        if (!allParticipantsGathered) return false;
+
+        await this.setupChannels();
+        await this.channelsHandler.moveVocalPlayers(this.configuration);
+        await this.rolesHandler.sendRolesToPlayers(this.configuration);
+        return this.configuration;
     }
 
-    init() {
-        return new Promise((resolve, reject) => {
-
-            this.richEmbed = CommunicationHandler.getLGSampleMsg()
-                .addField("LG - Initialisation", "Initialisation du jeu...");
-
-            this.preparationChannel.send(this.richEmbed).then(msg => {
-                this.msg = msg;
-                resolve(true);
-            }).catch(err => reject(err));
-        });
+    async init() {
+        this.richEmbed = CommunicationHandler.getLGSampleMsg().addField("LG - Initialisation", "Initialisation du jeu...");
+        this.msg = await this.preparationChannel.send(this.richEmbed);
     }
 
     createRoles() {
@@ -90,7 +80,7 @@ class GamePreparation extends IGame {
         });
     }
 
-    initEvents() {
+    gatherParticipants() {
         return new Promise((resolve, reject) => {
 
             let gamePreparationMsg = new ReactionHandler(this.msg, ["🐺", "🚪", "❇", "🔚"]);
@@ -123,7 +113,7 @@ class GamePreparation extends IGame {
                 } else if (reaction.emoji.name === "❇") {
                     reaction.remove(guildMember.user).catch(console.error);
                     if (guildMember.id === this.stemmingPlayer.id || guildMember.hasPermission('BAN_MEMBERS')) {
-                        if (this.configuration.getParticipantsNames().length > 1) {
+                        if (this.configuration.getParticipantsNames().length >= this.MIN_PLAYERS) {
                             this.status = true;
                             gamePreparationMsg.collector.stop();
                         }
@@ -154,12 +144,13 @@ class GamePreparation extends IGame {
         });
     }
 
-    setupChannels() {
-        return new Promise((resolve, reject) => {
-            this.checkChannels().then((areChannelsReady) => {
-                return this.channelsHandler.setupChannels(areChannelsReady, this.configuration);
-            }).then(() => resolve(true)).catch(err => reject(err));
-        });
+    async setupChannels() {
+        let areChannelsReady = await this.checkChannels();
+
+        await this.askForChannelGeneration();
+        await this.channelsHandler.setupChannels(areChannelsReady, this.configuration);
+
+        return true;
     }
 
     checkChannels() {

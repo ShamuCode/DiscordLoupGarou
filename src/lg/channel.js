@@ -265,6 +265,20 @@ class ChannelsHandler extends IGame {
         });
     }
 
+    async cleanChannels(endMsg) {
+
+        let paradis_lg = this._channels.get(this.channels.paradis_lg);
+        let village_lg = this._channels.get(this.channels.village_lg);
+        let loup_garou_lg = this._channels.get(this.channels.loups_garou_lg);
+
+        [paradis_lg, village_lg, loup_garou_lg].forEach(channel => {
+            if (channel) {
+                channel.send(endMsg).catch(() => true);
+            }
+        });
+
+    }
+
     /**
      *
      * @param channelId String
@@ -360,6 +374,30 @@ class ChannelsHandler extends IGame {
             .addField("LG - Jeu", message)
             .setColor(BotData.BotValues.botColor)
         );
+    }
+
+    async resetPermissionsOverwrites() {
+        await this.deletePermissionsOverwrites();
+
+        let promises = [];
+
+        for (let channel of this._channels.values()) {
+
+            if (channel.type === "text") {
+                promises.push(channel.overwritePermissions(
+                    this.everyoneRole,
+                    {
+                        'VIEW_CHANNEL': true,
+                        'SEND_MESSAGES': false,
+                        'ADD_REACTIONS': true
+                    }
+                ));
+            }
+
+        }
+
+        return await Promise.all(promises);
+
     }
 
     deletePermissionsOverwrites() {

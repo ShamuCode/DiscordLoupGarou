@@ -20,6 +20,7 @@ class Game extends IGame {
 
         this.guild = message.guild;
 
+        this.endMsg = null;
 
         this.gameOptions = gameOptions;
 
@@ -97,9 +98,9 @@ class Game extends IGame {
         await Wait.seconds(5);
         await msg.delete();
 
-        let endMsg = await this.flow.run();
+        this.endMsg = await this.flow.run();
 
-        await this.stemmingChannel.send(endMsg);
+        await this.stemmingChannel.send(this.endMsg);
         let msgSent = await this.stemmingChannel.send("Nettoyage des channels dans 5 secondes");
         await Wait.seconds(5);
         await msgSent.delete();
@@ -186,7 +187,8 @@ class Game extends IGame {
             if (this.preparation.keepChannels === false) {
                 quitPromises.push(this.preparation.channelsHandler.deleteChannels());
             } else {
-                quitPromises.push(this.preparation.channelsHandler.deletePermissionsOverwrites());
+                quitPromises.push(this.preparation.channelsHandler.cleanChannels(this.endMsg));
+                quitPromises.push(this.preparation.channelsHandler.resetPermissionsOverwrites());
             }
 
             Promise.all(quitPromises).then(() => {

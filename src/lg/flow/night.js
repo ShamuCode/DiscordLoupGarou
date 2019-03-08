@@ -80,6 +80,9 @@ class Night extends Period {
 
         await this.GameConfiguration.channelsHandler.sendMessageToVillage("🌌 La nuit tombe.");
 
+        await this.callComedien();
+        await this.updateRoleMaps();
+
         // noinspection JSCheckFunctionSignatures
         await Promise.all([
             this.callLoupsGarou(),
@@ -126,6 +129,10 @@ class Night extends Period {
 
         await Promise.all(promises);
 
+    }
+
+    async callComedien() {
+        return this;
     }
 
     async callLoupsGarou() {
@@ -262,6 +269,14 @@ class Night extends Period {
         return this;
     }
 
+    async callCorbeau() {
+        return this;
+    }
+
+    async callPyromane() {
+        return this;
+    }
+
 }
 
 class FirstNight extends Night {
@@ -280,9 +295,17 @@ class FirstNight extends Night {
 
         await this.callVoleur();
         await this.updateRoleMaps();
+
         await this.callCupidon();
         await this.updateRoleMaps();
+
         await this.callEnfantSauvage();
+        await this.updateRoleMaps();
+
+        await this.callComedien();
+        await this.updateRoleMaps();
+
+        await this.callJugeBegue();
         await this.updateRoleMaps();
 
         // noinspection JSCheckFunctionSignatures
@@ -310,6 +333,13 @@ class FirstNight extends Night {
             this.callRenard()
         ]);
 
+        await this.updateRoleMaps();
+
+        // noinspection JSCheckFunctionSignatures
+        await Promise.all([
+            this.callCorbeau(),
+            this.callPyromane(),
+        ]);
         await this.updateRoleMaps();
 
         await this.GameConfiguration.channelsHandler.switchPermissions(
@@ -451,6 +481,10 @@ class FirstNight extends Night {
             "L'**Enfant Sauvage** se rendort.", undefined, lg_var.roles_img.EnfantSauvage
         );
 
+        return this;
+    }
+
+    async callJugeBegue() {
         return this;
     }
 

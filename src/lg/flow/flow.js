@@ -5,120 +5,8 @@ const LgLogger = require("../logger");
 const botColor = require("../variables").botColor;
 const Wait = require("../../functions/wait.js").Wait;
 const EventEmitter = require('events');
-const CommunicationHandler = require('../communicationHandler').CommunicationHandler;
-let timeToString = require('../../functions/time');
-const ReactionHandler = require("../../functions/reactionHandler").ReactionHandler;
-
-class IGame {
-
-    constructor(client) {
-
-        this.client = client;
-
-        return this;
-
-    }
-
-}
-
-class GlobalTimer {
-    constructor(channel, secInterval) {
-        this.embed = CommunicationHandler
-            .getLGSampleMsg()
-            .addField(
-                `⏭`,
-                "Réagissez avec ⏭ pour skip l'attente. Tout le monde doit skip pour pouvoir procéder."
-            );
-        this.timer = null;
-        this.message = null;
-        this.channel = channel;
-        this.secInterval = secInterval ? secInterval : 5;
-
-        this.count = 0;
-        this.max = 0;
-        this.time = null;
-        return this;
-    }
-
-    async end() {
-        clearInterval(this.timer);
-        this.count = 0;
-        await this.message.delete();
-        this.message = null;
-        return this;
-    }
-
-    setTimer(minutes, title, playerNb) {
-        return new Promise((resolve, reject) => {
-            if (this.timer) clearInterval(this.timer);
-
-            this.max = playerNb;
-
-            this.time = minutes;
-
-            this.embed.setTitle(`${title} : ${timeToString(minutes)}`);
-
-            let msgPromise = [];
-
-            if (!this.message) {
-                msgPromise.push(this.channel.send(this.embed));
-            } else {
-                msgPromise.push(this.message.edit(this.embed));
-            }
-
-            Promise.all(msgPromise)
-                .then((msgs) => {
-                    this.message = msgs.shift();
-                    return new ReactionHandler(this.message, ["⏭"]).addReactions()
-                })
-                .then(/** @type {ReactionHandler} */ reactionHandler => {
-
-                    reactionHandler.initCollector(
-                        (reaction) => {
-                            if (reaction.emoji.name === "⏭") {
-                                this.count += 1;
-                                if (this.count === this.max) {
-                                    reactionHandler.stop();
-                                }
-                            }
-                        },
-                        () => {
-                            this.message.delete()
-                                .then(() => {
-                                    this.end().catch(() => this.message = null);
-                                    resolve(this);
-                                })
-                                .catch(err => reject(err));
-                        },
-                        (reaction) => reaction.count > 1
-                    );
-
-                    this.timer = setInterval(() => {
-                        this.update().then(isDone => {
-                            if (isDone) resolve(this);
-                        }).catch(console.error);
-                    }, this.secInterval * 1000);
-
-                })
-                .catch(err => reject(err));
-
-        });
-    }
-
-    async update() {
-        this.time = ((this.time * 60) - this.secInterval) / 60;
-
-        if (this.time <= 0) {
-            this.end().catch(() => this.message = null);
-            return true;
-        } else {
-            this.embed.setTitle(`${this.embed.title.split(':')[0]}: ${timeToString(this.time)}`);
-            await this.message.edit(this.embed);
-            return false;
-        }
-    }
-
-}
+const GlobalTimer = require("./timer").GlobalTimer;
+const IGame = require("../game/interface").IGame;
 
 class GameFlow extends IGame {
 
@@ -142,6 +30,10 @@ class GameFlow extends IGame {
         this.gameStats = new RichEmbed().setColor(botColor).setDescription("Fin de partie");
 
         this.deadPeople = [];
+
+        this.GameStatusEmbed = new RichEmbed().setColor(BotData.BotValues.botColor).setThumbnail(lg_var.roles_img.LoupGarou);
+        this.GameStatusMsg = null;
+        this.initMsg = null;
 
         return this;
 
@@ -223,9 +115,10 @@ class GameFlow extends IGame {
 
         this.moveEveryPlayersToVocalChannel().catch(console.error);
 
-        await this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
+        this.initMsg = await this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
             .send(new RichEmbed().setColor(BotData.BotValues.botColor)
-                .setAuthor("Les Loups-garous de Thiercelieux [v2.2]", lg_var.roles_img.LoupGarou)
+                .setAuthor("Les Loups-garous de Thiercelieux [Beta v1.6]", lg_var.roles_img.LoupGarou)
+                .setTitle("Un jeu imaginé et conçu par Phillippe des Pallières et Hervé Marly")
                 .setDescription('Développé par Kazuhiro#1248.\n\n*Thiercelieux est un petit village rural d\'apparence paisible,' +
                     ' mais chaque nuit certains villageois se transforment en loups-garou pour dévorer d\'autres villageois...*\n')
                 .addField("Règles :",
@@ -233,18 +126,32 @@ class GameFlow extends IGame {
                     'un rôle spécial) et les loups-garou. Le but des villageois est de découvrir et d\'éliminer ' +
                     'les loups-garou, et le but des loups-garou est d\'éliminer tous les villageois.\nPour ' +
                     'les amoureux, leur but est de survivre tous les deux jusqu\'à la fin de la partie.')
+                .addField(
+                    "Un jeu imaginé par Phillippe des Pallières et Hervé Marly",
+                    "Illustration du jeu de base, de Nouvelle Lune et du Corbeau : Alexios Tjoyas\n" +
+                    "Illustration du Village : Stéphane Poinsot\n" +
+                    "Illustration de Personnages : Misda et Christine Deschamps\n"
+                )
                 .setFooter("Bienvenue à Thiercelieux, sa campagne paisible, son école charmante, sa population accueillante, ainsi que " +
                     "ses traditions ancestrales et ses mystères inquiétants.", lg_var.roles_img.LoupGarou)
-                .setImage(lg_var.roles_img.LoupGarou));
-
-
-        await this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
-            .send(new RichEmbed().setColor(BotData.BotValues.botColor)
-                .addField(
-                    "Table ronde",
-                    this.GameConfiguration.getTable().map(member => member.displayName).toString().replace(/,+/g, '\n')
-                )
+                .setImage(lg_var.roles_img.LoupGarou)
+                .setURL("http://www.loups-garous.com")
             );
+
+
+        this.GameStatusEmbed
+            .addField(
+                "Configuration de la partie",
+                this.GameConfiguration.toString()
+            )
+            .addField(
+                "Table ronde",
+                this.GameConfiguration.getTable().map(member => member.displayName).toString().replace(/,+/g, '\n')
+            );
+
+        this.GameStatusMsg = await this.GameConfiguration.channelsHandler._channels
+            .get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
+            .send(this.GameStatusEmbed);
 
 
         this.GameConfiguration = await new FirstDay(this.GameConfiguration, this.gameInfo, this.turnNb).goThrough();
@@ -258,6 +165,13 @@ class GameFlow extends IGame {
         await this.killPlayers(shouldDie);
 
         return await this.gameLoop();
+    }
+
+    async updateGameStatusMsg() {
+        if (this.GameStatusMsg && this.GameStatusEmbed) {
+            this.GameStatusEmbed.fields[0].value = this.GameConfiguration.toString();
+            await this.GameStatusMsg.edit(this.GameStatusEmbed);
+        }
     }
 
     async moveEveryPlayersToVocalChannel() {
@@ -419,9 +333,7 @@ class GameFlow extends IGame {
 
         }
 
-        LgLogger.info(`Game ended: ${gameHasEnded} | game status: ${
-            Object.values(gameStatus).reduce((accumulator, currentValue) => accumulator + currentValue)
-            } players remaining`, this.gameInfo);
+        LgLogger.info(`Game ended: ${gameHasEnded} | ${this.GameConfiguration.toString()}`, this.gameInfo);
 
         return gameHasEnded;
     }
@@ -431,6 +343,8 @@ class GameFlow extends IGame {
         let shouldDie = [];
 
         while (await this.gameEnded() === false) {
+
+            await this.updateGameStatusMsg();
 
             await Wait.seconds(3);
 
@@ -476,6 +390,9 @@ class GameFlow extends IGame {
         }
 
         LgLogger.info("Game is over", this.gameInfo);
+
+        if (this.GameStatusMsg) this.GameStatusMsg.delete().catch(() => true);
+        if (this.initMsg) this.initMsg.delete().catch(() => true);
 
         return this.gameStats;
     }

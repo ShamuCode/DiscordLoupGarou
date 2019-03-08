@@ -19,6 +19,22 @@ class GameConfiguration {
 
     }
 
+    toString() {
+
+        let msg = 'Configuration du jeu\n\n';
+
+        let conf = this.getRoleMap({alive: true, dead: false});
+
+        for (let [role, playerArray] of conf.entries()) {
+
+            msg += `__${role}__ : **${playerArray.length}**\n`;
+
+        }
+
+        return msg;
+
+    }
+
     get charmedPlayers() {
 
         let charmedPlayers = [];

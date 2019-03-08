@@ -1,3 +1,4 @@
+const lg_var = require("../../variables");
 const roles_img = require("../../variables").roles_img;
 const EveryOneVote = require("../../vote").EveryOneVote;
 const Villageois = require("../baseRole").Villageois;
@@ -13,47 +14,34 @@ class Voyante extends Villageois {
         return this;
     }
 
-    processRole(configuration) {
-        return new Promise((resolve, reject) => {
+    async processRole(configuration) {
+        let dmChannel = await this.getDMChannel();
 
-            this.GameConfiguration = configuration;
-            let roleDetected = null;
+        let outcome = await new EveryOneVote(
+            "Choisissez une personne pour voir son rôle",
+            configuration,
+            40000, dmChannel, 1
+        ).excludeDeadPlayers().runVote([this.member.id]);
 
-            this.getDMChannel().then(dmChannel => {
+        if (!outcome || outcome.length === 0) {
+            await dmChannel.send("Ton tour est terminé, tu n'as pas joué ton rôle de voyante");
+            return this;
+        } else if (outcome.length === 1) {
 
-                return new EveryOneVote(
-                    "Choisissez une personne pour voir son rôle",
-                    this.GameConfiguration,
-                    40000, dmChannel, 1
-                ).excludeDeadPlayers().runVote([this.member.id]);
+            let target = configuration.getPlayerById(outcome[0]);
 
-            }).then(outcome => {
+            await configuration.channelsHandler.sendMessageToVillage(`La Voyante a détecté un(e) ${target.role}`, lg_var.roles_img[target.role]);
 
-                if (!outcome || outcome.length === 0) {
-                    this.dmChannel.send("Ton tour est terminé, tu n'as pas joué ton rôle de voyante").catch(console.error);
+            await dmChannel.send(new RichEmbed()
+                .setAuthor(target.member.displayName, target.member.user.avatarURL)
+                .setTitle(target.role)
+                .setImage(roles_img[target.role])
+                .setColor(target.member.displayColor)
+            );
 
-                    return resolve(this);
-                } else if (outcome.length === 1) {
+        }
 
-                    let target = this.GameConfiguration.getPlayerById(outcome[0]);
-
-                    roleDetected = target.role;
-
-                    return this.dmChannel.send(new RichEmbed()
-                        .setAuthor(target.member.displayName, target.member.user.avatarURL)
-                        .setTitle(target.role)
-                        .setImage(roles_img[target.role])
-                        .setColor(target.member.displayColor)
-                    );
-
-                }
-
-            }).then(() => {
-                if (roleDetected) {
-                    return configuration.channelsHandler.sendMessageToVillage(`La Voyante a détecté un(e) ${roleDetected}`);
-                }
-            }).then(() => resolve(this)).catch(err => reject(err));
-        });
+        return this;
     }
 
 }
