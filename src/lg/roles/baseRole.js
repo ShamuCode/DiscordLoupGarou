@@ -15,6 +15,7 @@ class Player {
         this.alive = true;
         this.voted = false;
         this.infected = false;
+        this.charmed = false;
         this.amoureux = undefined;
         this.role = "Joueur";
 
@@ -60,6 +61,8 @@ class Player {
     }
 
     async die(configuration) {
+
+        this.charmed = false;
 
         let additionnalTargets = [];
 

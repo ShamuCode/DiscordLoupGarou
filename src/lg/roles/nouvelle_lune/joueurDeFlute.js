@@ -1,10 +1,30 @@
-const send = require("../../message_sending");
-const lg_var = require("../../lg_var");
-const lg_func = require("../../lg_functions");
+const SondageInfiniteChoice = require("../../../functions/cmds/referendum").SondageInfiniteChoice;
 const Player = require("../baseRole").Player;
-//let GroupDMChannel = require("discord.js").GroupDMChannel;
 let RichEmbed = require("discord.js").RichEmbed;
+const botData = require('../../../BotData');
 
+
+/**
+ * Ennemi à la fois des villageois et des loups-garous, le joueur de flûte se réveille à la fin de chaque nuit et
+ * choisit chaque fois deux nouveaux joueurs qu'il va charmer. Puis, il se rendort et le meneur de jeu réveille
+ * tous les joueurs charmés (anciens et nouveaux) pour qu'ils se reconnaissent. Les joueurs charmés continuent à
+ * jouer normalement (quel que soit leur rôle), mais si, à n'importe quel moment, le joueur de flûte est en vie
+ * et tous les autres joueurs vivants sont charmés, le joueur de flûte gagne immédiatement, seul. Selon les variantes,
+ * sa victoire peut ne pas arrêter la partie pour les autres joueurs ou la terminer instantanément.
+ *
+ * Si le joueur de flûte est en couple, il devra charmer tout le monde sauf lui et son amoureux.
+ *
+ * Si le joueur de flûte est infecté (cf rubrique infect père des loups), son objectif change et il devra alors
+ * gagner avec les loups-garous
+ *
+ * chaque nuit, il vous enverra un MP pour vous informer de qui ilva charmer.Il envoie alors, s'il le désire,
+ * jusqu'à deux noms. A la fin de la nuit, juste avant d'annoncer le jour,on annonce alors aux charmés (par Mp)
+ * qu'ils l'ont été, ainsi que l'identité de tous les autres charmés. Si le Joueur de Flute meurt, tous les
+ * charmés ne le sont plus.
+ *
+ * //todo: (Attention : si le Joueur de Flute réussit à charmer l'ensemble des villageois, mais qu'il ne survit pas à la nuit, alors le joueur de flute a échoué dans sa mission, et meurt.)
+ *
+ */
 class JoueurDeFlute extends Player {
 
     constructor(guildMember, gameInfo) {
@@ -16,136 +36,79 @@ class JoueurDeFlute extends Player {
         return this;
     }
 
+    async charmPlayer(configuration) {
+
+        let dmChannel = await this.getDMChannel();
+
+        let outcome = await new EveryOneVote(
+            "Choisissez une personne à charmer",
+            configuration,
+            40000, dmChannel, 1
+        ).excludeDeadPlayers().excludeCharmedPlayers().runVote([this.member.id]);
+
+        if (!outcome || outcome.length === 0) {
+            await dmChannel.send("Vous n'avez pas charmé de joueur.");
+        } else {
+
+            let targetId = outcome.shift();
+            let target = configuration._players.get(targetId);
+
+            target.charmed = true;
+
+            await dmChannel.send(`Tu as charmé ${target.member.displayName}`);
+
+        }
+
+    }
+
+    async wantsToCharm(question) {
+
+        let choices = ["Oui", "Non"];
+
+        let choiceArray = await new SondageInfiniteChoice(
+            question,
+            choices, await this.getDMChannel(), 30000,
+            new RichEmbed().setColor(botData.BotValues.botColor),
+            true, true, 1
+        ).post();
+
+        let result = [];
+
+        choiceArray.forEach(choice => {
+            result.push(choice[0] - 1);
+        });
+
+        if (result.length === 0) {
+            return false;
+        } else {
+            return result.shift() === 0;
+        }
+
+    }
+
+    async processRole(configuration) {
+
+        if (await this.wantsToCharm("Voulez-vous charmer des joueurs ?")) {
+
+            await this.charmPlayer(configuration);
+
+            if (await this.wantsToCharm("Voulez-vous charmer un autre joueur ?")) {
+                await this.charmPlayer(configuration);
+            }
+
+        }
+
+        return this;
+    }
+
+    async die(configuration) {
+
+        configuration.getAlivePlayers().forEach(player => {
+            if (player.charmed) player.charmed = false;
+        });
+
+        return await super.die();
+
+    }
+
 }
-
-/**
- * chaque nuit, il vous enverra un MP pour vous informer de qui ilva charmer.Il envoie alors, s'il le désire,
- * jusqu'à deux noms. A la fin de la nuit, juste avant d'annoncer le jour,on annonce alors aux charmés (par Mp)
- * qu'ils l'ont été, ainsi que l'identité de tous les autres charmés. Si le Joueur de Flute meurt, tous les
- * charmés ne le sont plus. //todo: (Attention : si le Joueur de Flute réussit à charmer l'ensemble des villageois, mais qu'il ne survit pas à la nuit, alors le joueur de flute a échoué dans sa mission, et meurt.)
- * @param client
- * @param message
- */
-function joueurFlute(client, message) {
-    return new Promise((resolve, reject) => {
-       let g_set = client.guilds_settings.get(message.guild.id);
-
-       /*if (LG.turn === 1) {
-           LG.charmed_player_channel = new GroupDMChannel(client, {
-               name: "Charmés par le joueur de flûte",
-               icon: 'https://www.loups-garous-en-ligne.com/jeu/assets/images/carte15.png',
-               ownerID: message.guild.me.id,
-               managed: true,
-               applicationID: '',
-               lastMessageID: message.id
-           });
-       }*/
-       if (g_set.LG.role_players_id.JoueurDeFlute.length === 0) {
-           resolve(null);
-       }
-
-       send.message_to_village(client, message, "J'appelle le joueur de flûte").catch(err => reject(err));
-
-       let joueurFluteID = g_set.LG.role_players_id.JoueurDeFlute[0];
-       let joueurFlute = g_set.LG.players[joueurFluteID];
-
-       joueurFlute.member_object.createDM().then(jFluteChan => {
-
-           let exception_id_array = [g_set.LG.role_players_id.JoueurDeFlute[0]];
-           let amoureux_id = g_set.LG.players[g_set.LG.role_players_id.JoueurDeFlute[0]].amoureux;
-           if (amoureux_id) {
-               exception_id_array.push(amoureux_id);
-           }
-           let players = lg_func.get_player_list(client, message, exception_id_array);
-           let player_list = players.string;
-           let players_array = players.array;
-
-           jFluteChan.send(
-               new RichEmbed().setAuthor("Joueur de flûte", lg_var.roles_img.JoueurDeFlute).setColor(7419530)
-                   .setDescription(
-                       "Tu es le joueur de flûte, tu peux choisir de charmer jusqu'à deux joueurs"
-                   )
-                   .addField("**Choix 1 :** charmer jusqu'à 2 joueurs", `${player_list}\n__commande:__ vote 1 2`, true)
-                   .addField("**Choix 2 :** passer son tour", "__commande:__ vote nul", true)
-                   .setFooter("Tu as 2 minutes pour faire ton choix", lg_var.roles_img.JoueurDeFlute)
-           ).catch(err => reject(err));
-
-           let msg_timeout = setTimeout(() => {
-               jFluteChan.send("Il te reste 20 secondes pour faire un choix.")
-                   .catch(console.error);
-           }, 100000);
-
-           let joueurFluteMsgColl = jFluteChan.createMessageCollector(
-               (m) => m.author.id !== m.guild.me.id,
-               {time: 120000}
-               );
-
-           joueurFluteMsgColl.on("collect", msg => {
-
-               if (msg.content) {
-
-                   let answer = msg.content.toLowerCase().trim().split(/ +/g);
-                   let choices = [];
-
-                   if (answer[0] !== "vote" || answer.length > 3) {
-                       return;
-                   }
-
-                   if (answer[1] === "nul") {
-                       joueurFluteMsgColl.stop();
-                       return;
-                   } else {
-
-                       let correct_answer = true;
-
-                       answer.slice(1).forEach(choice => {
-
-                           let choiceNb = parseInt(choice);
-
-                           if (isNaN(choiceNb)) {
-                               jFluteChan.send("Veuillez entrer un nombre.").catch(err => reject(err));
-                               correct_answer = false;
-                               return;
-                           }
-
-                           if (!g_set.LG.players[players_array[choiceNb - 1]]) {
-                               jFluteChan.send(`Les numéros vont de ${players_array.length - players_array.length + 1} à ${players_array.length}.`)
-                                   .catch(err => reject(err));
-                               correct_answer = false;
-                           }
-
-                           choices.push(choiceNb);
-
-                       });
-                       if (!correct_answer) {
-                           return;
-                       }
-
-                   }
-
-                   choices.forEach(choice => {
-                       let target = g_set.LG.players[players_array[choice - 1]];
-
-                       g_set.LG.charmed_players_id_tmp_array.push(target.id);
-                       g_set.LG.charmed_players_id.push(target.id);
-                   });
-
-                   joueurFluteMsgColl.stop('JoueurFlute turn done');
-               }
-
-           });
-
-           joueurFluteMsgColl.on("end", () => {
-               if (g_set.LG.quitting_game) {
-                   return;
-               }
-               clearTimeout(msg_timeout);
-               resolve(null);
-           });
-
-       }).catch(err => reject(err));
-
-    });
-}
-
-module.exports = {JoueurDeFlute};

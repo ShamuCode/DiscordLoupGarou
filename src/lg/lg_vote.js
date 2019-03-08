@@ -1,4 +1,4 @@
-const Sondage = require("../functions/cmds/referendum").SondageInfiniteChoice;
+const SondageInfiniteChoice = require("../functions/cmds/referendum").SondageInfiniteChoice;
 const CommunicationHandler = require("./message_sending.js").CommunicationHandler;
 
 class Vote {
@@ -23,6 +23,15 @@ class Vote {
 
         for (let player of this.configuration._players.values()) {
             if (!player.alive) this.additionnalExceptions.push(player.member.id);
+        }
+
+        return this;
+    }
+
+    excludeCharmedPlayers() {
+
+        for (let player of this.configuration._players.values()) {
+            if (player.charmed) this.additionnalExceptions.push(player.member.id);
         }
 
         return this;
@@ -65,7 +74,7 @@ class Vote {
                 });
             }
 
-            new Sondage(
+            new SondageInfiniteChoice(
                 this.question, names, this.channel, this.time,
                 CommunicationHandler.getLGSampleMsg(),
                 true, this.deleteAll, this.maxVotes

@@ -110,20 +110,20 @@ class Sondage {
 
 }
 
+/**
+ *
+ * @param question String
+ * @param choices Array
+ * @param channel Channel
+ * @param time Milliseconds
+ * @param embed RichEmbed
+ * @param deleteIt Delete sondage afterwards
+ * @param deleteAll Delete all responses
+ * @param maxVotes Maximum votes
+ * @returns {SondageInfiniteChoice}
+ */
 class SondageInfiniteChoice {
 
-    /**
-     *
-     * @param question String
-     * @param choices Array
-     * @param channel Channel
-     * @param time Milliseconds
-     * @param embed RichEmbed
-     * @param deleteIt Delete sondage afterwards
-     * @param deleteAll Delete all responses
-     * @param maxVotes Maximum votes
-     * @returns {SondageInfiniteChoice}
-     */
     constructor(question, choices, channel, time, embed, deleteIt, deleteAll, maxVotes) {
 
         this.question = question;

@@ -2,7 +2,7 @@ const BotData = require("../BotData.js");
 const lg_var = require("./lg_var");
 const LgLogger = require("./lg_logger");
 const VoiceHandler = require("./lg_voice").VoiceHandler;
-const GameFlow = require("./lg_flow").GameFlow;
+const GameFlow = require("./flow/lg_flow").GameFlow;
 const ChannelsHandler = require("./lg_channel").ChannelsHandler;
 const RolesHandler = require("./roles/lg_role").RolesHandler;
 const ReactionHandler = require("../functions/reactionHandler").ReactionHandler;
@@ -509,6 +509,32 @@ class GameConfiguration {
         this.channelsHandler = undefined;
         this.rolesHandler = undefined;
         this.voiceHandler = undefined;
+
+    }
+
+    get charmedPlayers() {
+
+        let charmedPlayers = [];
+
+        for (let player of this._players.values()) {
+            if (player.charmed) {
+                charmedPlayers.push(charmedPlayers);
+            }
+        }
+
+        return charmedPlayers;
+
+    }
+
+    get JoueurDeFlute() {
+
+        for (let player of this._players.values()) {
+            if (player.role === "JoueurDeFlute") {
+                return player;
+            }
+        }
+
+        return null;
 
     }
 
