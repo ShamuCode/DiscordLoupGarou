@@ -3,14 +3,16 @@ let botData = require("../BotData.js");
 const fs = require('fs');
 
 module.exports = {
-    name: 'help',
+    name: __filename.split('/').pop().split('.').shift(),
     description: 'afficher ce message d\'aide',
     execute(LGBot, message) {
 
         let helpMsg = new RichEmbed()
             .setColor(botData.BotValues.botColor)
-            .setImage(LGBot.user.avatarURL)
-            .setTitle("Guide pour jouer");
+            .setThumbnail(LGBot.user.avatarURL)
+            .setAuthor("Guide pour jouer", LGBot.user.avatarURL)
+            .setTitle("Cliquez ici pour ajouter vos musiques personnalisées au bot")
+            .setURL("https://docs.google.com/spreadsheets/d/18-N7KfwYHyRIsKG06D_5tLIrpoLaeOm9WvS_RT79wfc/edit?usp=sharing");
 
         let i = 1;
 
@@ -23,11 +25,11 @@ module.exports = {
                 i = 0;
                 helpMsg = new RichEmbed()
                     .setColor(botData.BotValues.botColor)
-                    .setImage(LGBot.user.avatarURL)
+                    .setThumbnail(LGBot.user.avatarURL)
                     .setTitle("Guide pour jouer");
             }
 
-            helpMsg.addField(command.name, command.description);
+            helpMsg.addField(`${botData.BotValues.botPrefix}${command.name}`, command.description);
 
             i++;
         }

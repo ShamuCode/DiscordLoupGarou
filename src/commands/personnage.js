@@ -1,38 +1,10 @@
 let botData = require("../BotData.js");
 const LoupGarou = require("../lg/game/game");
 const getMusics = require('../functions/googleSheets');
+const GameOptions = require("../lg/game/options").GameOptions;
 const get_random_in_array = require("../functions/parsing_functions").get_random_in_array;
 const SondageInfiniteChoice = require("../functions/cmds/referendum").SondageInfiniteChoice;
 const RichEmbed = require('discord.js').RichEmbed;
-
-class GameOptions {
-    constructor() {
-        this._voice = true;
-        this._music = true;
-        this._musics = null;
-
-        this.musicMode = null;
-
-        return this;
-    }
-
-    set voice(value) {
-        this._voice = value;
-    }
-
-    get voice() {
-        return this._voice;
-    }
-
-    set music(value) {
-        this._music = value;
-    }
-
-    get music() {
-        return this._music;
-    }
-
-}
 
 let askMusicMode = async (message) => {
 
@@ -69,7 +41,7 @@ let askMusicMode = async (message) => {
 
 let askOptions = async (message) => {
 
-    let gameOptions = new GameOptions();
+    let gameOptions = new GameOptions().activatePersonnageExtension();
 
     gameOptions.musicMode = await askMusicMode(message);
 
@@ -99,29 +71,16 @@ let launchNewGame = async (LGBot, message, LG) => {
 };
 
 module.exports = {
-    name: 'new',
-    description: 'Lancer une nouvelle partie de Thiercelieux',
+    name: __filename.split('/').pop().split('.').shift(),
+    description: 'Lancer une nouvelle partie de Loup Garou avec l\'extension Personnages',
     execute(LGBot, message) {
 
         if (!message.member) {
             return;
         }
 
-        let LG = LGBot.LG.get(message.guild.id);
+        message.reply("L'extension Personnages est en cours de développement").catch(console.error);
 
-        if (LG === undefined || LG === null) {
-            LG = botData.LG;
-            LGBot.LG.set(message.guild.id, LG);
-            LG = LGBot.LG.get(message.guild.id);
-        }
-
-        if (!LG.running) {
-
-            launchNewGame(LGBot, message, LG).catch(console.error);
-
-        } else {
-            message.channel.send("Partie de LG déjà en cours, pour stopper la partie de force, tapez lg/stop").catch(console.error);
-        }
     },
 };
 

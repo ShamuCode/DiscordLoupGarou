@@ -1,21 +1,28 @@
 let botData = require("../BotData.js");
 
 module.exports = {
-    name: 'stop',
+    name: __filename.split('/').pop().split('.').shift(),
     description: 'forcer la fin de partie',
     execute(LGBot, message) {
+
         if (!message.member) {
             return;
         }
 
         let LG = LGBot.LG.get(message.guild.id);
+        let Settings = LGBot.Settings.get(message.guild.id);
 
         if (LG === undefined || LG === null) {
             LG = botData.LG;
             LGBot.LG.set(message.guild.id, LG);
         }
 
-        if (!message.member.hasPermission("BAN_MEMBERS") && !LG.canRun.includes(message.author.id)) {
+        if (!Settings) {
+            Settings = botData.Settings;
+            LGBot.Settings.set(message.guild.id, Settings);
+        }
+
+        if (!message.member.hasPermission("BAN_MEMBERS") && !Settings.Admins.includes(message.author.id)) {
             message.channel.send("Vous n'avez pas la permission de stopper la partie").catch(console.error);
             return;
         }

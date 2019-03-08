@@ -1,11 +1,6 @@
 const Discord = require('discord.js');
 const LGBot = new Discord.Client();
 
-const BGM = new Discord.Client();
-
-// UTC + x
-const UTC_LOCAL_TIMESIFT = 1;
-
 const Enmap = require('enmap');
 const EnmapLevel = require('enmap-level');
 
@@ -17,6 +12,9 @@ LGBot.Settings = new Enmap({provider: Settings});
 
 const LG = new EnmapLevel({name: "LG"});
 LGBot.LG = new Enmap({provider: LG});
+
+const userStat = new EnmapLevel({name: "userStat"});
+LGBot.userStat = new Enmap({provider: userStat});
 
 LGBot.commands = new Discord.Collection();
 
@@ -32,7 +30,7 @@ LGBot.on('ready', () => {
     console.info('The bot is ready.');
     console.info(`Connected to ${LGBot.guilds.size} servers, servicing ${LGBot.users.size} users.`);
 
-    LGBot.user.setActivity("lg/new - Réalisé par Kazuhiro#1248").catch(console.error);
+    LGBot.user.setActivity(`Lancez une partie avec ${BotData.BotValues.botPrefix}new - Réalisé par Kazuhiro#1248`).catch(console.error);
 
     LGBot.voiceConnections.array().forEach(voiceConnection => {
         voiceConnection.disconnect();

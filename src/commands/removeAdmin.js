@@ -1,7 +1,7 @@
 const RichEmbed = require('discord.js').RichEmbed;
 let botData = require("../BotData.js");
 
-let addAdmins = (LGBot, message) => {
+let removeAdmins = (LGBot, message) => {
 
     if (message.member && message.member.hasPermission("BAN_MEMBERS")) {
 
@@ -12,7 +12,10 @@ let addAdmins = (LGBot, message) => {
             Settings = LGBot.Settings.get(message.guild.id);
         }
 
-        Settings.Admins.push(message.mentions.members.array().map(member => member.id));
+        message.mentions.members.array().map(member => member.id).forEach(memberId => {
+            Settings.Admins.splice(Settings.Admins.indexOf(memberId), 1);
+        });
+
         Settings.Admins = [...new Set(Settings.Admins)];
 
         LGBot.Settings.set(message.guild.id, Settings);
@@ -36,8 +39,8 @@ let addAdmins = (LGBot, message) => {
 
 module.exports = {
     name: `${__filename.split('/').pop().split('.').shift()} @Utilisateur1 @Utilisateur2 ...`,
-    description: 'Ajouter des admins au bot LG, capables de stopper des parties de force. Il est nécessaire de mentionner pour sélectionner.',
+    description: 'Supprimer des admins au bot LG, capables de stopper des parties de force. Il est nécessaire de mentionner pour sélectionner.',
     execute(LGBot, message) {
-        addAdmins(LGBot, message);
+        removeAdmins(LGBot, message);
     },
 };

@@ -34,7 +34,7 @@ let getOccupiedGuilds = (LGBot) => {
 };
 
 module.exports = {
-    name: 'restart',
+    name: __filename.split('/').pop().split('.').shift(),
     description: 'ADMIN|relancer le bot',
     execute(LGBot, message, args) {
         if (message.author.id === "140033402681163776") {
