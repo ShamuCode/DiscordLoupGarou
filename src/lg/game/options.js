@@ -32,22 +32,15 @@ class GameOptions {
         return this._music;
     }
 
-    activateThiercelieuxExtension() {
+    activateExtension(extension) {
+        this.extensions[extension] = true;
+        return this;
+    }
+
+    activateAllExtensions() {
         this.extensions.thiercelieux = true;
-        return this;
-    }
-
-    activateNouvelleLuneExtension() {
         this.extensions.nouvelleLune = true;
-        return this;
-    }
-
-    activatePersonnageExtension() {
         this.extensions.personnage = true;
-        return this;
-    }
-
-    activateVillageExtension() {
         this.extensions.village = true;
         return this;
     }
