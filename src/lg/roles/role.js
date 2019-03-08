@@ -22,10 +22,11 @@ class IGame {
 
 class RolesHandler extends IGame {
 
-    constructor(client, guild, gameInfo) {
+    constructor(client, guild, gameInfo, gameOptions) {
         super(client);
 
         this.gameInfo = gameInfo;
+        this.gameOptions = gameOptions;
 
         this.guild = guild;
 
@@ -77,34 +78,29 @@ class RolesHandler extends IGame {
         };
 
         this.role_conf = [
-            {
-                LoupGarou: 1,
-            },
             // Thiercelieux
             {
                 Voyante: 1,
                 Chasseur: 1,
                 Cupidon: 1,
                 Sorciere: 1,
-            },
-            {
-                LoupGarou: 1,
-            },
-            {
                 PetiteFille: 1,
                 Voleur: 1,
             },
+            // !Thiercelieux
             // Nouvelle lune
             {
-                Villageois: 1,
-                LoupGarou: 1,
                 Salvateur: 1,
                 IdiotDuVillage: 1,
                 BoucEmissaire: 1,
                 JoueurDeFlute: 1
             },
             {
-                Villageois: 1,
+                Ancien: 1,
+            },
+            //!Nouvelle Lune
+            //Personnages
+            {
                 EnfantSauvage: 1,
                 Chevalier: 1,
                 Ange: 1,
@@ -118,16 +114,14 @@ class RolesHandler extends IGame {
                 AbominableSectaire: 1,
                 ChienLoup: 1,
                 VillageoisVillageois: 1,
-                Corbeau: 1
-            },
-            {
+                Corbeau: 1,
                 GrandMechantLoup: 1,
-                Ancien: 1,
                 JugeBegue: 1,
             },
+            //!Personnages
             {
                 Villageois: Number.MAX_SAFE_INTEGER,
-                LoupGarou: 1
+                LoupGarou: Number.MAX_SAFE_INTEGER
             }
         ];
 

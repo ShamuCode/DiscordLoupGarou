@@ -77,6 +77,7 @@ let launchNewGame = async (LGBot, message, LG, extension) => {
 };
 
 let instanciateLgGame = async (LGBot, message, extension) => {
+
     if (!message.member) {
         return;
     }

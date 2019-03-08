@@ -24,7 +24,7 @@ class GamePreparation extends IGame {
         this.stemmingPlayer = player;
         this.preparationChannel = channel;
         this.configuration = new GameConfiguration(this.gameInfo);
-        this.rolesHandler = new RolesHandler(client, guild, this.gameInfo);
+        this.rolesHandler = new RolesHandler(client, guild, this.gameInfo, this.gameOptions);
         this.channelsHandler = new ChannelsHandler(client, guild, this.gameInfo);
         this.voiceHandler = new VoiceHandler(this.channelsHandler._channels.get(this.channelsHandler.voiceChannels.vocal_lg), gameOptions.musicMode);
 
@@ -45,6 +45,7 @@ class GamePreparation extends IGame {
         let allParticipantsGathered = await this.gatherParticipants();
         if (!allParticipantsGathered) return false;
 
+        this.configuration = await this.rolesHandler.assignRoles(this.configuration);
         await this.setupChannels();
         await this.channelsHandler.moveVocalPlayers(this.configuration);
         await this.rolesHandler.sendRolesToPlayers(this.configuration);
@@ -133,12 +134,7 @@ class GamePreparation extends IGame {
                     resolve(false);
                 } else {
                     gamePreparationMsg.removeReactionList(["🐺", "❇"]).catch(console.error);
-                    this.rolesHandler.assignRoles(this.configuration)
-                        .then((configuration) => {
-                            this.configuration = configuration;
-                            resolve(this.status);
-                        })
-                        .catch(err => reject(err));
+                    resolve(this.status);
                 }
             }, (reaction) => reaction.count > 1 && reaction.users.last().id !== this.client.user.id);
         });
