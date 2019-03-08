@@ -20,6 +20,7 @@ LGBot.LG = new Enmap({provider: LG});
 
 LGBot.commands = new Discord.Collection();
 
+// noinspection JSUnresolvedFunction
 for (const file of fs.readdirSync('./src/commands')) {
     const command = require(`./commands/${file}`);
 

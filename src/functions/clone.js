@@ -14,7 +14,7 @@ let clone = (obj) => {
     // Handle Array
     if (obj instanceof Array) {
         copy = [];
-        for (var i = 0, len = obj.length; i < len; i++) {
+        for (let i = 0, len = obj.length; i < len; i++) {
             copy[i] = clone(obj[i]);
         }
         return copy;

@@ -1,4 +1,4 @@
-const EveryOneVote = require("../../lg_vote").EveryOneVote;
+const EveryOneVote = require("../../vote").EveryOneVote;
 const Villageois = require("../baseRole").Villageois;
 
 /**

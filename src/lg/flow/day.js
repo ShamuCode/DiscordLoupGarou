@@ -1,9 +1,9 @@
-const LgLogger = require("../lg_logger");
-const DayVote = require("../lg_vote").DayVote;
+const LgLogger = require("../logger");
+const DayVote = require("../vote").DayVote;
 const get_random_in_array = require("../../functions/parsing_functions").get_random_in_array;
-const EveryOneVote = require("../lg_vote.js").EveryOneVote;
+const EveryOneVote = require("../vote.js").EveryOneVote;
 let timeToString = require('../../functions/time');
-const Period = require("./lg_period").Period;
+const Period = require("./period").Period;
 
 class Day extends Period {
 

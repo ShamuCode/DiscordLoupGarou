@@ -87,6 +87,10 @@ class Musics {
 
 }
 
+/**
+ *
+ * @returns {Promise<Musics>}
+ */
 let getMusics = () => new Promise((resolve, reject) => {
 
     authorize(function (authClient) {
@@ -100,6 +104,7 @@ let getMusics = () => new Promise((resolve, reject) => {
             auth: authClient,
         };
 
+        // noinspection JSUnresolvedVariable
         sheets.spreadsheets.values.get(request, function (err, response) {
             if (err) {
                 reject(err);

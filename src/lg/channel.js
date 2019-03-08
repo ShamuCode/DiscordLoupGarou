@@ -1,18 +1,7 @@
 const BotData = require("../BotData.js");
-const lg_var = require("./lg_var");
+const lg_var = require("./variables");
+const IGame = require("./game/interface").IGame;
 const RichEmbed = require("discord.js").RichEmbed;
-
-class IGame {
-
-    constructor(client) {
-
-        this.client = client;
-
-        return this;
-
-    }
-
-}
 
 class ChannelsHandler extends IGame {
 
@@ -281,7 +270,7 @@ class ChannelsHandler extends IGame {
      * @param channelId String
      * @param permission Object
      * @param players Array<Player>
-     * @returns {Promise<any>}
+     * @returns {Promise<boolean>}
      */
     switchPermissions(channelId, permission, players) {
         return new Promise((resolve, reject) => {

@@ -1,7 +1,7 @@
 const BotData = require("../../BotData.js");
-const lg_var = require("../lg_var");
-const LGGame = require("./roleFactory");
-const LgLogger = require("../lg_logger");
+const lg_var = require("../variables");
+const LGGame = require("./factory");
+const LgLogger = require("../logger");
 const get_random_in_array = require("../../functions/parsing_functions").get_random_in_array;
 const shuffle_array = require("../../functions/parsing_functions").shuffle_array;
 const ReactionHandler = require("../../functions/reactionHandler").ReactionHandler;
@@ -143,6 +143,9 @@ class RolesHandler extends IGame {
 
         this.gameType = this.thiercelieux;
 
+        /**
+         * @type {Array}
+         */
         this.gameTypeCopy = clone(this.gameType);
 
         let gameTypeCopyObj;
@@ -279,7 +282,7 @@ class RolesHandler extends IGame {
 
     getAdditionnalRoles(number) {
         return new Promise((resolve, reject) => {
-            const lg_functions = require('../lg_functions.js');
+            const lg_functions = require('../functions.js');
 
             let additionalRoles = [];
 

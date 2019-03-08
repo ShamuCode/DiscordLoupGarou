@@ -1,9 +1,9 @@
-const lg_var = require('../lg_var.js');
-const LgLogger = require("../lg_logger");
-const LoupGarouVote = require("../lg_vote").LoupGarouVote;
+const lg_var = require('../variables.js');
+const LgLogger = require("../logger");
+const LoupGarouVote = require("../vote").LoupGarouVote;
 const get_random_in_array = require("../../functions/parsing_functions").get_random_in_array;
-const allRoles = require("../roles/roleFactory").allRoles;
-const Period = require("./lg_period").Period;
+const allRoles = require("../roles/factory").allRoles;
+const Period = require("./period").Period;
 
 class Night extends Period {
 
@@ -80,6 +80,7 @@ class Night extends Period {
 
         await this.GameConfiguration.channelsHandler.sendMessageToVillage("🌌 La nuit tombe.");
 
+        // noinspection JSCheckFunctionSignatures
         await Promise.all([
             this.callLoupsGarou(),
             this.callJoueurDeFlute(),
@@ -88,6 +89,7 @@ class Night extends Period {
 
         await this.updateRoleMaps();
 
+        // noinspection JSCheckFunctionSignatures
         await Promise.all([
             this.callVoyante(),
             this.callChaman(),
@@ -97,6 +99,7 @@ class Night extends Period {
 
         await this.updateRoleMaps();
 
+        // noinspection JSCheckFunctionSignatures
         await Promise.all([
             this.callSorciere(),
             this.callRenard()
@@ -282,6 +285,7 @@ class FirstNight extends Night {
         await this.callEnfantSauvage();
         await this.updateRoleMaps();
 
+        // noinspection JSCheckFunctionSignatures
         await Promise.all([
             this.callLoupsGarou(),
             this.callJoueurDeFlute(),
@@ -290,6 +294,7 @@ class FirstNight extends Night {
 
         await this.updateRoleMaps();
 
+        // noinspection JSCheckFunctionSignatures
         await Promise.all([
             this.callVoyante(),
             this.callChaman(),
@@ -299,6 +304,7 @@ class FirstNight extends Night {
 
         await this.updateRoleMaps();
 
+        // noinspection JSCheckFunctionSignatures
         await Promise.all([
             this.callSorciere(),
             this.callRenard()
@@ -414,6 +420,7 @@ class FirstNight extends Night {
 
         LgLogger.info(`${choice1.member.displayName} et ${choice2.member.displayName} sont en couple.`, this.gameInfo);
 
+        // noinspection JSCheckFunctionSignatures
         await Promise.all([
             cupidon.member.send(`${choice1.member.displayName} et ${choice2.member.displayName} sont en couple.`),
             choice1.member.send(`Tu es en couple avec ${choice2.member.displayName} 💞`),

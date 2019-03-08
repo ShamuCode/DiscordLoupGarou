@@ -1,6 +1,6 @@
 const RichEmbed = require("discord.js").RichEmbed;
-const LgLogger = require("../../lg_logger");
-const EveryOneVote = require("../../lg_vote").EveryOneVote;
+const LgLogger = require("../../logger");
+const EveryOneVote = require("../../vote").EveryOneVote;
 const Villageois = require("../baseRole").Villageois;
 
 /**

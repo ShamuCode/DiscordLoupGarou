@@ -112,3 +112,5 @@ class JoueurDeFlute extends Player {
     }
 
 }
+
+module.exports = {JoueurDeFlute};

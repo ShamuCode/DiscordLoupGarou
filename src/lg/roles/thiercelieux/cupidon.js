@@ -1,5 +1,5 @@
 const Villageois = require("../baseRole").Villageois;
-const EveryOneVote = require("../../lg_vote.js").EveryOneVote;
+const EveryOneVote = require("../../vote.js").EveryOneVote;
 
 class Cupidon extends Villageois {
 

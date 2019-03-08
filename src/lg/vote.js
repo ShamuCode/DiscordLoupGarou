@@ -1,5 +1,5 @@
 const SondageInfiniteChoice = require("../functions/cmds/referendum").SondageInfiniteChoice;
-const CommunicationHandler = require("./message_sending.js").CommunicationHandler;
+const CommunicationHandler = require("./communicationHandler").CommunicationHandler;
 
 class Vote {
 

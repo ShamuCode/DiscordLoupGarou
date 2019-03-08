@@ -1,4 +1,4 @@
-const EveryOneVote = require("../../lg_vote").EveryOneVote;
+const EveryOneVote = require("../../vote").EveryOneVote;
 const ReactionHandler = require("../../../functions/reactionHandler").ReactionHandler;
 const Villageois = require("../baseRole").Villageois;
 let RichEmbed = require('discord.js').RichEmbed;

@@ -1,5 +1,5 @@
-const roles_img = require("../../lg_var").roles_img;
-const EveryOneVote = require("../../lg_vote").EveryOneVote;
+const roles_img = require("../../variables").roles_img;
+const EveryOneVote = require("../../vote").EveryOneVote;
 const Villageois = require("../baseRole").Villageois;
 let RichEmbed = require('discord.js').RichEmbed;
 

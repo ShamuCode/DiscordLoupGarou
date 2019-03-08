@@ -4,6 +4,7 @@ class ReactionHandler {
      * Constructor of the reaction handler
      * @param message an existing message in a discord channel
      * @param reactionListInit optional parameter to init a list of reaction to the message
+     * @param obj
      */
     constructor(message, reactionListInit, obj) {
         this.message = message;
@@ -22,7 +23,7 @@ class ReactionHandler {
 
     /**
      * removes every reactions of the message
-     * @returns {Promise<bool>} resolve(true) if success, reject(err_message) if failure
+     * @returns {Promise<boolean>} resolve(true) if success, reject(err_message) if failure
      */
     removeAllReactions() {
         return new Promise((resolve, reject) => {
@@ -43,7 +44,7 @@ class ReactionHandler {
     /**
      *
      * @param notordered if set to true, adds the reactions without order
-     * @returns {Promise<bool>} resolve(true) if success, reject(err_message) if failure
+     * @returns {Promise<boolean>} resolve(true) if success, reject(err_message) if failure
      */
     addReactions(notordered) {
         return new Promise((resolve, reject) => {

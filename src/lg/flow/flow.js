@@ -1,11 +1,11 @@
 const RichEmbed = require("discord.js").RichEmbed;
 const BotData = require("../../BotData.js");
-const lg_var = require('../lg_var.js');
-const LgLogger = require("../lg_logger");
-const botColor = require("../lg_var").botColor;
+const lg_var = require('../variables.js');
+const LgLogger = require("../logger");
+const botColor = require("../variables").botColor;
 const Wait = require("../../functions/wait.js").Wait;
 const EventEmitter = require('events');
-const CommunicationHandler = require('../message_sending').CommunicationHandler;
+const CommunicationHandler = require('../communicationHandler').CommunicationHandler;
 let timeToString = require('../../functions/time');
 const ReactionHandler = require("../../functions/reactionHandler").ReactionHandler;
 
@@ -71,7 +71,7 @@ class GlobalTimer {
                     this.message = msgs.shift();
                     return new ReactionHandler(this.message, ["⏭"]).addReactions()
                 })
-                .then(reactionHandler => {
+                .then(/** @type {ReactionHandler} */ reactionHandler => {
 
                     reactionHandler.initCollector(
                         (reaction) => {

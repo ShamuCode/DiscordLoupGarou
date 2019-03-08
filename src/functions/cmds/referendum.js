@@ -227,7 +227,7 @@ class SondageInfiniteChoice {
 
             this.embed = this.embed
                 .setTitle(this.question)
-                .setDescription("Veuillez taper le nombre correspondant à votre choix avec la commande ```vote <nombre>```")
+                .setDescription("Veuillez taper le nombre correspondant à votre choix avec la commande ```vote <!--suppress HtmlUnknownTag --><nombre>```")
                 .addBlankField()
                 .addField("Choix", this.getChoiceList().toString(), true)
                 .addField("Votes", this.getVoteData().toString(), true)
@@ -245,7 +245,7 @@ class SondageInfiniteChoice {
                     this.updateTimer();
                 }, 5000);
 
-                const vote = this.channel.createMessageCollector(m => m.author.id !== BotData.BotValues.bot_id, {time: this.time});
+                const vote = this.channel.createMessageCollector(m => m.author.id !== BotData.BotValues.botId, {time: this.time});
 
                 vote.on("collect", collectedVote => {
 
@@ -263,9 +263,11 @@ class SondageInfiniteChoice {
                     if (!isNaN(parseInt(answerCollected))) {
 
                         let answer = parseInt(answerCollected);
+
                         let member = collectedVote.member;
 
                         if (!member) {
+                            // noinspection JSValidateTypes
                             member = collectedVote.author;
                         }
 
@@ -279,6 +281,7 @@ class SondageInfiniteChoice {
                         let choice = this.choices.get(answer);
 
                         if (!choice) {
+                            // noinspection JSUnresolvedFunction
                             member.send("Ce nombre ne correspond à personne").catch(console.error);
                             return;
                         }

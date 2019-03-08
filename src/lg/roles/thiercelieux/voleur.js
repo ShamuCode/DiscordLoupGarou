@@ -1,4 +1,4 @@
-const lg_var = require("../../lg_var");
+const lg_var = require("../../variables");
 const ReactionHandler = require("../../../functions/reactionHandler").ReactionHandler;
 const Villageois = require("../baseRole").Villageois;
 const RichEmbed = require('discord.js').RichEmbed;
@@ -71,7 +71,7 @@ class Voleur extends Villageois {
                     embed = embedMsg;
                     return new ReactionHandler(embedMsg, ['🇦', '🇧', '❌']).addReactions();
                 })
-                .then((proposition) => {
+                .then(/** @type {ReactionHandler} */(proposition) => {
                     proposition.initCollector((reaction) => {
                         if (reaction.emoji.name === "🇦") {
                             this.roleChosen = this.additionnalRoles[0];

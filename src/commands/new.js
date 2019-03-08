@@ -1,5 +1,5 @@
 let botData = require("../BotData.js");
-const LoupGarou = require("../lg/lg_game");
+const LoupGarou = require("../lg/game/game");
 const getMusics = require('../functions/googleSheets');
 const get_random_in_array = require("../functions/parsing_functions").get_random_in_array;
 const SondageInfiniteChoice = require("../functions/cmds/referendum").SondageInfiniteChoice;

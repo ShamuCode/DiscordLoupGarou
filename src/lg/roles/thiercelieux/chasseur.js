@@ -1,5 +1,5 @@
 const get_random_in_array = require("../../../functions/parsing_functions").get_random_in_array;
-const EveryOneVote = require("../../lg_vote").EveryOneVote;
+const EveryOneVote = require("../../vote").EveryOneVote;
 const Villageois = require("../baseRole").Villageois;
 
 class Chasseur extends Villageois {

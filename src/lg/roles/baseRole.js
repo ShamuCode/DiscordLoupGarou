@@ -1,6 +1,6 @@
-const lg_var = require("../lg_var");
+const lg_var = require("../variables");
 const get_random_in_array = require("../../functions/parsing_functions").get_random_in_array;
-const EveryOneVote = require("../lg_vote").EveryOneVote;
+const EveryOneVote = require("../vote").EveryOneVote;
 const RichEmbed = require("discord.js").RichEmbed;
 
 class Player {
