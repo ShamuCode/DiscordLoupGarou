@@ -148,8 +148,4 @@ function joueurFlute(client, message) {
     });
 }
 
-module.exports = {JoueurDeFlute,
-
-    joueurFlute
-
-};
+module.exports = {JoueurDeFlute};

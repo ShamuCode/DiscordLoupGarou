@@ -1,6 +1,4 @@
-const send = require("../../message_sending");
 const Villageois = require("../baseRole").Villageois;
-const get_player_list = require("../../lg_functions").get_player_list;
 const EveryOneVote = require("../../lg_vote.js").EveryOneVote;
 
 class Cupidon extends Villageois {
@@ -18,67 +16,56 @@ class Cupidon extends Villageois {
         return this;
     }
 
-    getChoice(configuration) {
-        return new Promise((resolve, reject) => {
+    async getChoice(configuration) {
 
-            this.GameConfiguration = configuration;
+        let dmChannel = await this.getDMChannel();
 
-            this.member.createDM().then(privateChannel => {
+        let firstOutcome = await new EveryOneVote(
+            "Veuillez choisir le premier élu",
+            configuration,
+            40000, dmChannel, 1
+        ).excludeDeadPlayers().runVote();
 
-                this.dmChannel = privateChannel;
+        if (!firstOutcome || firstOutcome.length === 0) {
 
-                return new EveryOneVote(
-                    "Veuillez choisir le premier élu",
-                    this.GameConfiguration,
-                    40000, this.dmChannel, 1
-                ).runVote();
+            await this.dmChannel.send("Tu n'as pas fait ton choix, ton tour est terminé");
+            await configuration.channelsHandler.sendMessageToVillage(
+                "**Cupidon** se rendort."
+            );
 
-            }).then(outcome => {
+            return [undefined, undefined];
 
-                if (!outcome || outcome.length === 0) {
+        } else if (firstOutcome.length === 1) {
 
-                    this.dmChannel.send("Tu n'as pas fait ton choix, ton tour est terminé").catch(console.error);
-                    this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                        "**Cupidon** se rendort."
-                    ).then(() => resolve([undefined, undefined])).catch(err => reject(err));
-                    return;
+            this.id1 = firstOutcome.shift();
 
-                } else if (outcome.length === 1) {
+        } else {
+            throw ("Plusieurs votes ont été fait pour cupidon, situation impossible");
+        }
 
-                    this.id1 = outcome.shift();
+        let secondOutcome = await new EveryOneVote(
+            "Veuillez choisir son/sa partenaire",
+            configuration,
+            40000, this.dmChannel, 1
+        ).excludeDeadPlayers().runVote([this.id1]);
 
-                } else {
-                    return reject("Plusieurs votes ont été fait pour cupidon, situation impossible");
-                }
+        if (!secondOutcome || secondOutcome.length === 0) {
 
-                return new EveryOneVote(
-                    "Veuillez choisir son/sa partenaire",
-                    this.GameConfiguration,
-                    40000, this.dmChannel, 1
-                ).excludeDeadPlayers().runVote([this.id1]);
+            await this.dmChannel.send("Tu n'as pas fait ton choix, ton tour est terminé");
+            await configuration.channelsHandler.sendMessageToVillage(
+                "**Cupidon** se rendort."
+            );
 
-            }).then(outcome => {
+        } else if (secondOutcome.length === 1) {
 
-                if (!outcome || outcome.length === 0) {
+            this.id2 = secondOutcome.shift();
 
-                    this.dmChannel.send("Tu n'as pas fait ton choix, ton tour est terminé").catch(console.error);
-                    this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                        "**Cupidon** se rendort."
-                    ).then(() => resolve([undefined, undefined])).catch(err => reject(err));
+        } else {
+            throw ("Plusieurs votes ont été fait pour cupidon, situation impossible");
+        }
 
-                } else if (outcome.length === 1) {
+        return [this.id1, this.id2];
 
-                    this.id2 = outcome.shift();
-
-                    resolve([this.id1, this.id2]);
-
-                } else {
-                    return reject("Plusieurs votes ont été fait pour cupidon, situation impossible");
-                }
-
-            }).catch(err => reject(err));
-
-        });
     }
 
 }

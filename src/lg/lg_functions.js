@@ -1,3 +1,9 @@
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
 module.exports = {
 
     /**
@@ -48,7 +54,7 @@ module.exports = {
      */
     get_random_index: array => {
         if (array.length === 1) return (0);
-        return (Math.floor(Math.random() * array.length));
+        return (getRandomInt(0, array.length));
     },
 
 };

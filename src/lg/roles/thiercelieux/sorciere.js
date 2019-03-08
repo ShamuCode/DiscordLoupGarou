@@ -113,73 +113,60 @@ class Sorciere extends Villageois {
         });
     }
 
-    askTargetToKill(configuration) {
-        return new Promise((resolve, reject) => {
+    async askTargetToKill(configuration) {
 
-            new EveryOneVote(
-                "Qui voulez-vous tuer ?",
-                configuration,
-                30000,
-                this.dmChannel,
-                1
-            ).excludeDeadPlayers().runVote([this.member.id])
-                .then(outcome => {
+        let outcome = await new EveryOneVote(
+            "Qui voulez-vous tuer ?",
+            configuration,
+            30000,
+            this.dmChannel,
+            1
+        ).excludeDeadPlayers().runVote([this.member.id]);
 
-                    if (!outcome || outcome.length === 0) {
+        if (!outcome || outcome.length === 0) {
 
-                        resolve(this);
+            return this;
 
-                    } else {
+        } else {
 
-                        this.target = configuration.getPlayerById(outcome[0]);
-                        resolve(this);
+            this.target = configuration.getPlayerById(outcome[0]);
+            return this;
 
-                    }
+        }
 
-                })
-                .catch(err => reject(err));
-
-        });
     }
 
-    processRole(configuration, lgTarget) {
-        return new Promise((resolve, reject) => {
-            this.target = null;
-            this.getDMChannel()
-                .then((dmChannel) => {
+    async processRole(configuration, lgTarget) {
+        this.target = null;
+        let dmChannel = await this.getDMChannel();
 
-                    dmChannel.send(new RichEmbed().setColor(this.member.displayColor)
-                        .setAuthor("Voici ton inventaire de potions", this.member.user.avatarURL)
-                        .addField("Poison", this.potions.poison, true)
-                        .addField("Vie", this.potions.vie, true)
-                    ).catch(() => true);
+        dmChannel.send(new RichEmbed().setColor(this.member.displayColor)
+            .setAuthor("Voici ton inventaire de potions", this.member.user.avatarURL)
+            .addField("Poison", this.potions.poison, true)
+            .addField("Vie", this.potions.vie, true)
+        ).catch(() => true);
 
-                    let promise = [];
+        let promise = [];
 
-                    if (this.potions.vie > 0) {
+        if (this.potions.vie > 0) {
 
-                        // if salvateur didn't targeted this player
-                        if (!lgTarget.immunity) {
-                            promise.push(this.askIfWannaSave(lgTarget));
-                        } else {
-                            lgTarget.immunity = false;
-                            this.targetIsSavedBySalva = true;
-                        }
+            // if salvateur didn't targeted this player
+            if (!lgTarget.immunity) {
+                promise.push(this.askIfWannaSave(lgTarget));
+            } else {
+                lgTarget.immunity = false;
+                this.targetIsSavedBySalva = true;
+            }
 
-                    }
+        }
 
-                    return Promise.all(promise);
+        await Promise.all(promise);
 
-                })
-                .then(() => {
-                    if (this.potions.poison > 0) {
-                        return this.askIfWannaKill(configuration);
-                    } else {
-                        resolve(this);
-                    }
-                })
-                .then(() => resolve(this)).catch(err => reject(err));
-        });
+        if (this.potions.poison > 0) {
+            return this.askIfWannaKill(configuration);
+        }
+
+        return this;
     }
 
 }

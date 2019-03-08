@@ -1,9 +1,39 @@
-let frereSoeurs = (client, message) => new Promise((resolve, reject) => {
-    resolve(null);
-});
+const Villageois = require("../baseRole").Villageois;
 
-module.exports = {
+class FamilleMember extends Villageois {
 
-    frereSoeurs
+    constructor(guildMember) {
+        super(guildMember);
 
-};
+
+
+        return this;
+    }
+
+}
+
+class Frere extends FamilleMember {
+
+    constructor(guildMember) {
+        super(guildMember);
+
+        this.role = "Frere";
+
+        return this;
+    }
+
+}
+
+class Soeur extends FamilleMember {
+
+    constructor(guildMember) {
+        super(guildMember);
+
+        this.role = "Soeur";
+
+        return this;
+    }
+
+}
+
+module.exports = {Frere, Soeur};

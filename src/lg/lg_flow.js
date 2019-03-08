@@ -10,11 +10,9 @@ const allRoles = require("./roles/roleFactory").allRoles;
 const Wait = require("../functions/wait.js").Wait;
 const EveryOneVote = require("./lg_vote.js").EveryOneVote;
 const EventEmitter = require('events');
-const Vote = require("./lg_vote").DayVote;
 const CommunicationHandler = require('./message_sending').CommunicationHandler;
 let timeToString = require('../functions/time');
 const ReactionHandler = require("../functions/reactionHandler").ReactionHandler;
-const Message = require('discord.js').Message;
 
 class IGame {
 
@@ -154,7 +152,7 @@ class GameFlow extends IGame {
 
     }
 
-    listenDeaths() {
+    async listenDeaths() {
         setImmediate(() => {
             this.killer.on("death", (deadPlayer) => {
 
@@ -218,56 +216,53 @@ class GameFlow extends IGame {
         });
     }
 
-    run() {
-        return new Promise((resolve, reject) => {
+    async run() {
 
-            this.GameConfiguration.globalTimer = new GlobalTimer(this.GameConfiguration.channelsHandler._channels.get(
-                this.GameConfiguration.channelsHandler.channels.thiercelieux_lg
-            ));
+        this.GameConfiguration.globalTimer = new GlobalTimer(this.GameConfiguration.channelsHandler._channels.get(
+            this.GameConfiguration.channelsHandler.channels.thiercelieux_lg
+        ));
 
-            this.listenDeaths();
+        await this.listenDeaths();
 
-            LgLogger.info('Game start', this.gameInfo);
+        LgLogger.info('Game start', this.gameInfo);
 
-            this.moveEveryPlayersToVocalChannel().catch(console.error);
+        this.moveEveryPlayersToVocalChannel().catch(console.error);
 
-            this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
-                .send(new RichEmbed().setColor(BotData.BotValues.botColor)
-                    .setAuthor("Les Loups-garous de Thiercelieux [v2.2]", lg_var.roles_img.LoupGarou)
-                    .setDescription('Développé par Kazuhiro#1248.\n\n*Thiercelieux est un petit village rural d\'apparence paisible,' +
-                        ' mais chaque nuit certains villageois se transforment en loups-garou pour dévorer d\'autres villageois...*\n')
-                    .addField("Règles :",
-                        'Les joueurs sont divisés en deux camps : les villageois (certains d\'entre eux jouant ' +
-                        'un rôle spécial) et les loups-garou. Le but des villageois est de découvrir et d\'éliminer ' +
-                        'les loups-garou, et le but des loups-garou est d\'éliminer tous les villageois.\nPour ' +
-                        'les amoureux, leur but est de survivre tous les deux jusqu\'à la fin de la partie.')
-                    .setFooter("Bienvenue à Thiercelieux, sa campagne paisible, son école charmante, sa population accueillante, ainsi que " +
-                        "ses traditions ancestrales et ses mystères inquiétants.", lg_var.roles_img.LoupGarou)
-                    .setImage(lg_var.roles_img.LoupGarou))
-                .then(() => this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
-                    .send(new RichEmbed().setColor(BotData.BotValues.botColor)
-                        .addField(
-                            "Table ronde",
-                            this.GameConfiguration.getTable().map(member => member.displayName).toString().replace(/,+/g, '\n')
-                        )
-                    )
-                ).catch(err => {
-                reject(err);
-            });
+        await this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
+            .send(new RichEmbed().setColor(BotData.BotValues.botColor)
+                .setAuthor("Les Loups-garous de Thiercelieux [v2.2]", lg_var.roles_img.LoupGarou)
+                .setDescription('Développé par Kazuhiro#1248.\n\n*Thiercelieux est un petit village rural d\'apparence paisible,' +
+                    ' mais chaque nuit certains villageois se transforment en loups-garou pour dévorer d\'autres villageois...*\n')
+                .addField("Règles :",
+                    'Les joueurs sont divisés en deux camps : les villageois (certains d\'entre eux jouant ' +
+                    'un rôle spécial) et les loups-garou. Le but des villageois est de découvrir et d\'éliminer ' +
+                    'les loups-garou, et le but des loups-garou est d\'éliminer tous les villageois.\nPour ' +
+                    'les amoureux, leur but est de survivre tous les deux jusqu\'à la fin de la partie.')
+                .setFooter("Bienvenue à Thiercelieux, sa campagne paisible, son école charmante, sa population accueillante, ainsi que " +
+                    "ses traditions ancestrales et ses mystères inquiétants.", lg_var.roles_img.LoupGarou)
+                .setImage(lg_var.roles_img.LoupGarou));
 
 
-            new FirstDay(this.GameConfiguration, this.gameInfo, this.turnNb).goThrough().then((conf) => {
+        await this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
+            .send(new RichEmbed().setColor(BotData.BotValues.botColor)
+                .addField(
+                    "Table ronde",
+                    this.GameConfiguration.getTable().map(member => member.displayName).toString().replace(/,+/g, '\n')
+                )
+            );
 
-                this.GameConfiguration = conf;
-                return new FirstNight(this.GameConfiguration, this.gameInfo, this.turnNb).goThrough();
 
-            })
-                .then((shouldDie) => this.killPlayers(shouldDie))
-                .then(() => this.gameLoop())
-                .then((endMsg) => resolve(endMsg))
-                .catch(err => reject(err));
+        this.GameConfiguration = await new FirstDay(this.GameConfiguration, this.gameInfo, this.turnNb).goThrough();
 
-        });
+        let shouldDie = await new FirstNight(this.GameConfiguration, this.gameInfo, this.turnNb).goThrough();
+
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            `Le jour se lève sur thiercelieux 🌄`
+        );
+
+        await this.killPlayers(shouldDie);
+
+        return await this.gameLoop();
     }
 
     async moveEveryPlayersToVocalChannel() {
@@ -402,9 +397,11 @@ class GameFlow extends IGame {
 
         }
 
-        LgLogger.info(`Game ended: ${gameHasEnded} | game status: ${gameStatus}`, this.gameInfo);
+        LgLogger.info(`Game ended: ${gameHasEnded} | game status: ${
+            Object.values(gameStatus).reduce((accumulator, currentValue) => accumulator + currentValue)
+            } players remaining`, this.gameInfo);
 
-        return gameHasEnded
+        return gameHasEnded;
     }
 
     async gameLoop() {
@@ -441,6 +438,10 @@ class GameFlow extends IGame {
             );
 
             shouldDie = await new Night(this.GameConfiguration, this.gameInfo, this.turnNb).goThrough();
+
+            await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+                `Le jour se lève sur thiercelieux 🌄`
+            );
 
             await this.killPlayers(shouldDie);
 
@@ -517,33 +518,16 @@ class Day extends Period {
 
     }
 
-    goThrough() {
-        return new Promise((resolve, reject) => {
-            LgLogger.info("Going through day", this.gameInfo);
+    async goThrough() {
+        LgLogger.info("Going through day", this.gameInfo);
+        let outcome = await this.debateTime();
 
-            this.displayNightOutcome()
-                .then(() => this.debateTime())
-                .then((outcome) => this.pronounceSentence(outcome))
-                .then((victim) => resolve([victim]))
-                .catch(err => reject(err));
-
-        })
-    }
-
-    async displayNightOutcome() {
-
-
-
-        return this;
+        return [await this.pronounceSentence(outcome)];
     }
 
     async debateTime() {
 
         let debateDuration = this.GameConfiguration.getAlivePlayers().length / 2; // in minutes
-
-        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
-            `Le jour se lève sur thiercelieux 🌄`
-        );
 
         await this.GameConfiguration.channelsHandler.sendMessageToVillage(
             `Vous disposez de ${timeToString(debateDuration)} pour débattre, et faire un vote`
@@ -575,7 +559,7 @@ class Day extends Period {
             this.GameConfiguration.getDeadPlayers()
         );
 
-        setTimeout(() => {
+        let voteTimeout = setTimeout(() => {
             this.GameConfiguration.channelsHandler.sendMessageToVillage(`Il reste ${timeToString(debateDuration / 4)} avant la fin du vote`)
         }, (debateDuration / 4) * 60 * 1000);
 
@@ -590,6 +574,8 @@ class Day extends Period {
             this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg),
             this.GameConfiguration.getAlivePlayers().length
         ).excludeDeadPlayers().runVote();
+
+        clearTimeout(voteTimeout);
 
         return outcome;
     }
@@ -680,116 +666,109 @@ class FirstDay extends Period {
         return this;
     }
 
-    goThrough() {
-        return new Promise((resolve, reject) => {
+    async goThrough() {
 
-            this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                "🌄 Le jour se lève à Thiercelieux." +
-                " Quand la neige éternelle ornera les montagnes, le capitaine devra être élu."
-            ).then(() => {
-                return this.GameConfiguration.voiceHandler.announceDayBegin();
-            }).then(() => this.GameConfiguration.globalTimer.setTimer(
-                1,
-                "Temps avant le vote du capitaine",
-                this.GameConfiguration.getAlivePlayers().length
-            ))
-                .then(() => this.capitaineElection())
-                .then(() => this.GameConfiguration.channelsHandler.sendMessageToVillage("⛰ La nuit va bientôt tomber sur Thiercelieux."))
-                .then(() => this.GameConfiguration.voiceHandler.announceNightSoon())
-                .then(() => this.GameConfiguration.globalTimer.setTimer(
-                    0.5,
-                    "Temps avant la tombée de la nuit",
-                    this.GameConfiguration.getAlivePlayers().length
-                ))
-                .then(() => resolve(this.GameConfiguration))
-                .catch(err => reject(err));
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            "🌄 Le jour se lève à Thiercelieux." +
+            " Quand la neige éternelle ornera les montagnes, le capitaine devra être élu."
+        );
 
-        });
+        await this.GameConfiguration.voiceHandler.announceDayBegin();
+        await this.GameConfiguration.globalTimer.setTimer(
+            1,
+            "Temps avant le vote du capitaine",
+            this.GameConfiguration.getAlivePlayers().length
+        );
+
+        await this.capitaineElection();
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage("⛰ La nuit va bientôt tomber sur Thiercelieux.");
+        await this.GameConfiguration.voiceHandler.announceNightSoon();
+        await this.GameConfiguration.globalTimer.setTimer(
+            0.5,
+            "Temps avant la tombée de la nuit",
+            this.GameConfiguration.getAlivePlayers().length
+        );
+
+        return this.GameConfiguration;
     }
 
-    capitaineElection() {
-        return new Promise((resolve, reject) => {
+    async capitaineElection() {
 
-            LgLogger.info('Begining capitaine election.', this.gameInfo);
+        LgLogger.info('Begining capitaine election.', this.gameInfo);
 
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            "🏔 Les villageois se réunissent afin d'élir leur capitaine\n" +
+            "C'est l'heure du vote !"
+        );
+
+        await this.GameConfiguration.voiceHandler.announceVoteCapitaine();
+
+        await this.GameConfiguration.channelsHandler.switchPermissions(
+            this.GameConfiguration.channelsHandler.channels.thiercelieux_lg,
+            {
+                'VIEW_CHANNEL': true,
+                'SEND_MESSAGES': true,
+                'ADD_REACTIONS': true
+            },
+            Array.from(this.GameConfiguration.getPlayers().values())
+        );
+
+        LgLogger.info('Permissions switch, init referendum.', this.gameInfo);
+
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            `Votez dans le channel ${this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg).toString()} !`
+        );
+
+        let outcome = await new EveryOneVote(
+            "Qui voulez-vous élir comme capitaine ?",
+            this.GameConfiguration,
+            120000,
+            this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg),
+            this.GameConfiguration._players.size
+        ).runVote();
+
+        LgLogger.info("Capitaine outcome : " + outcome, this.gameInfo);
+
+        if (outcome.length === 0) {
             this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                "🏔 Les villageois se réunissent afin d'élir leur capitaine\n" +
-                "C'est l'heure du vote !"
-            ).then(() => this.GameConfiguration.voiceHandler.announceVoteCapitaine()).then(() => {
+                "Le village n'a pas voulu élire de Capitaine."
+            ).catch(console.error);
 
-                return this.GameConfiguration.channelsHandler.switchPermissions(
-                    this.GameConfiguration.channelsHandler.channels.thiercelieux_lg,
-                    {
-                        'VIEW_CHANNEL': true,
-                        'SEND_MESSAGES': true,
-                        'ADD_REACTIONS': true
-                    },
-                    Array.from(this.GameConfiguration.getPlayers().values())
-                );
+            this.gameInfo.addToHistory(`Le village n'a pas élu de Capitaine du village.`);
 
-            }).then(() => {
+        } else if (outcome.length === 1) {
+            let id = outcome.shift();
+            let capitaineElected = this.GameConfiguration._players.get(id);
 
-                LgLogger.info('Permissions switch, init referendum.', this.gameInfo);
+            this.gameInfo.addToHistory(`Le village a élu ${capitaineElected.member.displayName} Capitaine du village.`);
 
-                this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                    `Votez dans le channel ${this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg).toString()} !`
-                ).catch(console.error);
+            await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+                `${capitaineElected.member.displayName} a été élu Capitaine de Thiercelieux !`
+            );
+            capitaineElected.capitaine = true;
+            this.GameConfiguration._players.set(id, capitaineElected);
+            this.GameConfiguration.capitaine = capitaineElected;
+        } else if (outcome.length > 1) {
 
-                return new EveryOneVote(
-                    "Qui voulez-vous élir comme capitaine ?",
-                    this.GameConfiguration,
-                    120000,
-                    this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg),
-                    this.GameConfiguration._players.size
-                ).runVote();
+            this.gameInfo.addToHistory(`Le village n'a pas élu de Capitaine du village.`);
 
-            }).then((outcome) => {
+            await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+                "Le village n'a pas pu élire de Capitaine, les votes étant trop serrés."
+            );
+        }
 
-                LgLogger.info("Capitaine outcome : " + outcome, this.gameInfo);
+        await this.GameConfiguration.channelsHandler.switchPermissions(
+            this.GameConfiguration.channelsHandler.channels.thiercelieux_lg,
+            {
+                'VIEW_CHANNEL': true,
+                'SEND_MESSAGES': false,
+                'ADD_REACTIONS': true
+            },
+            Array.from(this.GameConfiguration.getPlayers().values())
+        );
 
-                if (outcome.length === 0) {
-                    this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                        "Le village n'a pas voulu élire de Capitaine."
-                    ).catch(console.error);
+        return this.GameConfiguration;
 
-                    this.gameInfo.addToHistory(`Le village n'a pas élu de Capitaine du village.`);
-
-                } else if (outcome.length === 1) {
-                    let id = outcome.shift();
-                    let capitaineElected = this.GameConfiguration._players.get(id);
-
-                    this.gameInfo.addToHistory(`Le village a élu ${capitaineElected.member.displayName} Capitaine du village.`);
-
-                    this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                        `${capitaineElected.member.displayName} a été élu Capitaine de Thiercelieux !`
-                    ).catch(console.error);
-                    capitaineElected.capitaine = true;
-                    this.GameConfiguration._players.set(id, capitaineElected);
-                    this.GameConfiguration.capitaine = capitaineElected;
-                } else if (outcome.length > 1) {
-
-                    this.gameInfo.addToHistory(`Le village n'a pas élu de Capitaine du village.`);
-
-                    this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                        "Le village n'a pas pu élire de Capitaine, les votes étant trop serrés."
-                    ).catch(console.error);
-                }
-
-                return this.GameConfiguration.channelsHandler.switchPermissions(
-                    this.GameConfiguration.channelsHandler.channels.thiercelieux_lg,
-                    {
-                        'VIEW_CHANNEL': true,
-                        'SEND_MESSAGES': false,
-                        'ADD_REACTIONS': true
-                    },
-                    Array.from(this.GameConfiguration.getPlayers().values())
-                );
-
-            }).then(() => {
-                resolve(this.GameConfiguration);
-            }).catch(err => reject(err));
-
-        })
     }
 
 }
@@ -814,24 +793,22 @@ class Night extends Period {
         return this;
     }
 
-    initRole(roleName, prefix, realName) {
-        return new Promise((resolve, reject) => {
-            let roles = this.roleMap.get(roleName);
+    async initRole(roleName, prefix, realName) {
+        let roles = this.roleMap.get(roleName);
 
-            if (!roles || roles.length < 1) {
-                return resolve(false);
-            }
+        if (!roles || roles.length < 1) {
+            return false;
+        }
 
-            let role = roles[0];
+        let role = roles[0];
 
-            this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                `${prefix}**${realName ? realName : roleName}** se réveille.`,
-                undefined,
-                lg_var.roles_img[roleName]
-            ).catch(err => LgLogger.warn(err, this.gameInfo));
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            `${prefix}**${realName ? realName : roleName}** se réveille.`,
+            undefined,
+            lg_var.roles_img[roleName]
+        );
 
-            resolve(role);
-        });
+        return role;
     }
 
     async initPetiteFilleListening() {
@@ -865,74 +842,80 @@ class Night extends Period {
     }
 
 
-    goThrough() {
-        return new Promise((resolve, reject) => {
+    async goThrough() {
+        LgLogger.info("Going through night", this.gameInfo);
+        this.shouldDieTonight.clear();
 
-            LgLogger.info("Going through night", this.gameInfo);
-            this.shouldDieTonight.clear();
-            this.GameConfiguration.channelsHandler.sendMessageToVillage("🌌 La nuit tombe.")
-                .then(() => Promise.all([
-                    this.callLoupsGarou(),
-                    this.callJoueurDeFlute(),
-                    this.callSalvateur()
-                ]))
-                .then(() => this.updateRoleMaps())
-                .then(() => Promise.all([
-                    this.callVoyante(),
-                    this.callChaman(),
-                    this.callInfectPereDesLoups(),
-                    this.callFrereSoeurs()
-                ]))
-                .then(() => this.updateRoleMaps())
-                .then(() => Promise.all([
-                    this.callSorciere(),
-                    this.callRenard()
-                ]))
-                .then(() => this.updateRoleMaps())
-                .then(() => this.GameConfiguration.channelsHandler.switchPermissions(
-                    this.GameConfiguration.channelsHandler.channels.village_lg,
-                    {VIEW_CHANNEL: true, SEND_MESSAGES: true},
-                    this.GameConfiguration.getAlivePlayers()
-                ))
-                .then(() => resolve(Array.from(this.shouldDieTonight.values())))
-                .catch(err => reject(err));
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage("🌌 La nuit tombe.");
 
-        });
+        await Promise.all([
+            this.callLoupsGarou(),
+            this.callJoueurDeFlute(),
+            this.callSalvateur()
+        ]);
+
+        await this.updateRoleMaps();
+
+        await Promise.all([
+            this.callVoyante(),
+            this.callChaman(),
+            this.callInfectPereDesLoups(),
+            this.callFrereSoeurs()
+        ]);
+
+        await this.updateRoleMaps();
+
+        await Promise.all([
+            this.callSorciere(),
+            this.callRenard()
+        ]);
+
+        await this.updateRoleMaps();
+
+        await this.GameConfiguration.channelsHandler.switchPermissions(
+            this.GameConfiguration.channelsHandler.channels.village_lg,
+            {VIEW_CHANNEL: true, SEND_MESSAGES: true},
+            this.GameConfiguration.getAlivePlayers()
+        );
+
+        return Array.from(this.shouldDieTonight.values());
     }
 
-    callLoupsGarou() {
-        return new Promise((resolve, reject) => {
+    async callLoupsGarou() {
 
-            if (this.turnNb === 1) {
-                this.GameConfiguration.getLGChannel().send("Prenez garde à la petite fille...").catch(console.error);
-            }
-            this.initPetiteFilleListening().catch(console.error);
+        if (this.turnNb === 1) {
+            this.GameConfiguration.getLGChannel().send("Prenez garde à la petite fille...").catch(console.error);
+        }
+        await this.initPetiteFilleListening();
 
-            this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                `Les **Loups Garous** se réveillent 🐺`, undefined, lg_var.roles_img.LoupGarou
-            ).then(() => this.GameConfiguration.voiceHandler.announceRole("LoupGarou", true))
-                .then(() => new LoupGarouVote(
-                    "Veuillez choisir votre proie.",
-                    this.GameConfiguration,
-                    60000,
-                    this.GameConfiguration.getLGChannel()
-                ).excludeDeadPlayers().runVote(this.GameConfiguration.getLGIds())).then(outcome => {
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            `Les **Loups Garous** se réveillent 🐺`, undefined, lg_var.roles_img.LoupGarou
+        );
 
-                if (!outcome || outcome.length === 0) {
-                    this.shouldDieTonight.set("LGTarget", get_random_in_array(this.GameConfiguration.getVillageois(false)));
-                } else {
-                    this.shouldDieTonight.set("LGTarget", this.GameConfiguration.getPlayerById(get_random_in_array(outcome)));
-                }
+        await this.GameConfiguration.voiceHandler.announceRole("LoupGarou", true);
 
-                return this.GameConfiguration.getLGChannel().send(
-                    `Votre choix est de dévorer ${this.shouldDieTonight.get("LGTarget").member.displayName}`
-                );
+        let outcome = await new LoupGarouVote(
+            "Veuillez choisir votre proie.",
+            this.GameConfiguration,
+            60000,
+            this.GameConfiguration.getLGChannel()
+        ).excludeDeadPlayers().runVote(this.GameConfiguration.getLGIds());
 
-            }).then(() => this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                `Les **Loups Garous** se rendorment.`, undefined, lg_var.roles_img.LoupGarou
-            )).then(() => resolve(this)).catch(err => reject(err));
+        if (!outcome || outcome.length === 0) {
+            this.shouldDieTonight.set("LGTarget", get_random_in_array(this.GameConfiguration.getVillageois(false)));
+        } else {
+            this.shouldDieTonight.set("LGTarget", this.GameConfiguration.getPlayerById(get_random_in_array(outcome)));
+        }
 
-        });
+        await this.GameConfiguration.getLGChannel().send(
+            `Votre choix est de dévorer ${this.shouldDieTonight.get("LGTarget").member.displayName}`
+        );
+
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            `Les **Loups Garous** se rendorment.`, undefined, lg_var.roles_img.LoupGarou
+        );
+
+        return this;
     }
 
     async callJoueurDeFlute() {
@@ -1028,45 +1011,48 @@ class FirstNight extends Night {
 
     }
 
-    goThrough() {
-        return new Promise((resolve, reject) => {
+    async goThrough() {
 
-            this.GameConfiguration.channelsHandler.sendMessageToVillage("🌌 La nuit tombe.")
-                .then(() => this.callVoleur())
-                .then(() => this.updateRoleMaps())
-                .then(() => this.callCupidon())
-                .then(() => this.updateRoleMaps())
-                .then(() => this.callEnfantSauvage())
-                .then(() => this.updateRoleMaps())
-                .then(() => Promise.all([
-                    this.callLoupsGarou(),
-                    this.callJoueurDeFlute(),
-                    this.callSalvateur()
-                ]))
-                .then(() => this.updateRoleMaps())
-                .then(() => Promise.all([
-                    this.callVoyante(),
-                    this.callChaman(),
-                    this.callInfectPereDesLoups(),
-                    this.callFrereSoeurs()
-                ]))
-                .then(() => this.updateRoleMaps())
-                .then(() => Promise.all([
-                    this.callSorciere(),
-                    this.callRenard()
-                ]))
-                .then(() => this.updateRoleMaps())
-                .then(() => this.GameConfiguration.channelsHandler.switchPermissions(
-                    this.GameConfiguration.channelsHandler.channels.village_lg,
-                    {VIEW_CHANNEL: true, SEND_MESSAGES: true},
-                    this.GameConfiguration.getAlivePlayers()
-                ))
-                .then(() => resolve(Array.from(this.shouldDieTonight.values())))
-                .catch(err => {
-                    reject(err);
-                });
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage("🌌 La nuit tombe.");
 
-        });
+        await this.callVoleur();
+        await this.updateRoleMaps();
+        await this.callCupidon();
+        await this.updateRoleMaps();
+        await this.callEnfantSauvage();
+        await this.updateRoleMaps();
+
+        await Promise.all([
+            this.callLoupsGarou(),
+            this.callJoueurDeFlute(),
+            this.callSalvateur()
+        ]);
+
+        await this.updateRoleMaps();
+
+        await Promise.all([
+            this.callVoyante(),
+            this.callChaman(),
+            this.callInfectPereDesLoups(),
+            this.callFrereSoeurs()
+        ]);
+
+        await this.updateRoleMaps();
+
+        await Promise.all([
+            this.callSorciere(),
+            this.callRenard()
+        ]);
+
+        await this.updateRoleMaps();
+
+        await this.GameConfiguration.channelsHandler.switchPermissions(
+            this.GameConfiguration.channelsHandler.channels.village_lg,
+            {VIEW_CHANNEL: true, SEND_MESSAGES: true},
+            this.GameConfiguration.getAlivePlayers()
+        );
+
+        return Array.from(this.shouldDieTonight.values());
     }
 
     async callVoleur() {
@@ -1127,82 +1113,78 @@ class FirstNight extends Night {
         return this;
     }
 
-    callCupidon() {
-        return new Promise((resolve, reject) => {
+    async callCupidon() {
 
-            let cupidons = this.roleMap.get("Cupidon");
+        let cupidons = this.roleMap.get("Cupidon");
 
-            if (!cupidons || cupidons.length < 1) {
-                return resolve(true);
-            }
+        if (!cupidons || cupidons.length < 1) {
+            return true;
+        }
 
-            let cupidon = cupidons[0];
+        let cupidon = cupidons[0];
 
-            this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                "💘 **Cupidon** se réveille, il désignera __les amoureux__.", undefined,
-                lg_var.roles_img.Cupidon
-            ).catch(console.error);
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            "💘 **Cupidon** se réveille, il désignera __les amoureux__.", undefined,
+            lg_var.roles_img.Cupidon
+        );
 
-            this.GameConfiguration.voiceHandler.announceRole("Cupidon", true)
-                .then(() => cupidon.getChoice(this.GameConfiguration))
-                .then(([id1, id2]) => {
+        await this.GameConfiguration.voiceHandler.announceRole("Cupidon", true);
 
-                    let choice1 = this.GameConfiguration._players.get(id1);
-                    let choice2 = this.GameConfiguration._players.get(id2);
+        let [id1, id2] = cupidon.getChoice(this.GameConfiguration);
 
-                    if (!choice1 || !choice2) {
-                        LgLogger.info("Cupidon n'a pas fait son choix", this.gameInfo);
+        let choice1 = this.GameConfiguration._players.get(id1);
+        let choice2 = this.GameConfiguration._players.get(id2);
 
-                        let players = Array.from(this.GameConfiguration._players.values());
-                        let randomChoice = get_random_in_array(players);
-                        players.splice(players.indexOf(randomChoice));
+        if (!choice1 || !choice2) {
+            LgLogger.info("Cupidon n'a pas fait son choix", this.gameInfo);
 
-                        if (!choice1) choice1 = randomChoice;
-                        if (!choice2) choice2 = get_random_in_array(players);
-                    }
+            let players = Array.from(this.GameConfiguration._players.values());
+            let randomChoice = get_random_in_array(players);
+            players.splice(players.indexOf(randomChoice));
 
-                    choice1.amoureux = choice2.member.id;
-                    choice2.amoureux = choice1.member.id;
+            if (!choice1) choice1 = randomChoice;
+            if (!choice2) choice2 = get_random_in_array(players);
+        }
 
-                    this.GameConfiguration._players.set(choice1.member.id, choice1);
-                    this.GameConfiguration._players.set(choice2.member.id, choice2);
+        choice1.amoureux = choice2.member.id;
+        choice2.amoureux = choice1.member.id;
 
-                    LgLogger.info(`${choice1.member.displayName} et ${choice2.member.displayName} sont en couple.`, this.gameInfo);
+        this.GameConfiguration._players.set(choice1.member.id, choice1);
+        this.GameConfiguration._players.set(choice2.member.id, choice2);
 
-                    Promise.all([
-                        cupidon.member.send(`${choice1.member.displayName} et ${choice2.member.displayName} sont en couple.`),
-                        choice1.member.send(`Tu es en couple avec ${choice2.member.displayName} 💞`),
-                        choice2.member.send(`Tu es en couple avec ${choice1.member.displayName} 💞`),
-                    ]).then(() => this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                        "💘 **Cupidon** se rendort.", undefined, lg_var.roles_img.Cupidon
-                    )).then(() => resolve(this.GameConfiguration)).catch(err => reject(err));
+        LgLogger.info(`${choice1.member.displayName} et ${choice2.member.displayName} sont en couple.`, this.gameInfo);
 
-                }).catch(err => reject(err));
+        await Promise.all([
+            cupidon.member.send(`${choice1.member.displayName} et ${choice2.member.displayName} sont en couple.`),
+            choice1.member.send(`Tu es en couple avec ${choice2.member.displayName} 💞`),
+            choice2.member.send(`Tu es en couple avec ${choice1.member.displayName} 💞`),
+        ]);
 
-        });
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            "💘 **Cupidon** se rendort.", undefined, lg_var.roles_img.Cupidon
+        );
+
+        return this.GameConfiguration;
+
     }
 
-    callEnfantSauvage() {
-        return new Promise((resolve, reject) => {
+    async callEnfantSauvage() {
+        let enfantSauvage = this.roleMap.get("EnfantSauvage");
 
-            let enfantSauvage = this.roleMap.get("EnfantSauvage");
+        if (!enfantSauvage || enfantSauvage.length < 1) return this;
 
-            if (!enfantSauvage || enfantSauvage.length < 1) return resolve(this);
+        enfantSauvage = enfantSauvage[0];
 
-            enfantSauvage = enfantSauvage[0];
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            "L'**Enfant Sauvage** se réveille.", undefined, lg_var.roles_img.EnfantSauvage
+        );
 
-            this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                "L'**Enfant Sauvage** se réveille.", undefined, lg_var.roles_img.EnfantSauvage
-            ).catch(err => LgLogger.warn(err, this.gameInfo));
+        await enfantSauvage.askForModel(this.GameConfiguration);
+        await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+            "L'**Enfant Sauvage** se rendort.", undefined, lg_var.roles_img.EnfantSauvage
+        );
 
-            enfantSauvage.askForModel(this.GameConfiguration)
-                .then(() => this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                    "L'**Enfant Sauvage** se rendort.", undefined, lg_var.roles_img.EnfantSauvage
-                ))
-                .then(() => resolve(this))
-                .catch(err => reject(err));
-
-        })
+        return this;
     }
 
 }

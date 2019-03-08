@@ -1,5 +1,4 @@
 const lg_var = require("../../lg_var");
-const LgLogger = require("../../lg_logger");
 const ReactionHandler = require("../../../functions/reactionHandler").ReactionHandler;
 const Villageois = require("../baseRole").Villageois;
 const RichEmbed = require('discord.js').RichEmbed;

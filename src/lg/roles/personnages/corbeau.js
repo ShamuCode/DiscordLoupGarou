@@ -17,8 +17,4 @@ class Corbeau extends Villageois {
     }
 }
 
-module.exports = {
-
-    Corbeau
-
-};
+module.exports = {Corbeau};

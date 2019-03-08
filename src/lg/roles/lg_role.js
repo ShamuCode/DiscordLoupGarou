@@ -58,22 +58,22 @@ class RolesHandler extends IGame {
             BoucEmissaire: LGGame.Create.boucEmissaire,
             JoueurDeFlute: LGGame.Create.joueurDeFlute,
             EnfantSauvage: LGGame.Create.enfantSauvage,
-            /*Chevalier: LGGame.Create.chevalier,
-            Ange: LGGame.Create.ange,
+            //Chevalier: LGGame.Create.chevalier,
+            //Ange: LGGame.Create.ange,
             InfectPereDesLoups: LGGame.Create.infectPereDesLoups,
             Soeur: LGGame.Create.soeur,
             Renard: LGGame.Create.renard,
-            ServanteDevouee: LGGame.Create.servanteDevouee,
+            //ServanteDevouee: LGGame.Create.servanteDevouee,
             Frere: LGGame.Create.frere,
-            MontreurOurs: LGGame.Create.montreurOurs,
-            Comedien: LGGame.Create.comedien,
-            AbominableSectaire: LGGame.Create.abominableSectaire,
-            ChienLoup: LGGame.Create.chienLoup,
-            VillageoisVillageois: LGGame.Create.villageoisVillageois,
-            Corbeau: LGGame.Create.corbeau,
-            GrandMechantLoup: LGGame.Create.grandMechantLoup,
-            Ancien: LGGame.Create.ancien,
-            JugeBegue: LGGame.Create.jugeBegue,*/
+            //MontreurOurs: LGGame.Create.montreurOurs,
+            //Comedien: LGGame.Create.comedien,
+            //AbominableSectaire: LGGame.Create.abominableSectaire,
+            //ChienLoup: LGGame.Create.chienLoup,
+            //VillageoisVillageois: LGGame.Create.villageoisVillageois,
+            //Corbeau: LGGame.Create.corbeau,
+            //GrandMechantLoup: LGGame.Create.grandMechantLoup,
+            //Ancien: LGGame.Create.ancien,
+            //JugeBegue: LGGame.Create.jugeBegue,
         };
 
         this.role_conf = [
@@ -147,7 +147,7 @@ class RolesHandler extends IGame {
 
         let gameTypeCopyObj;
 
-        for (let i = 1; i < this.gameTypeCopy.length ; i++) {
+        for (let i = 1; i < this.gameTypeCopy.length; i++) {
             gameTypeCopyObj = Object.assign(this.gameTypeCopy[0], this.gameTypeCopy[i]);
             this.gameTypeCopy[0] = gameTypeCopyObj;
         }
@@ -262,27 +262,19 @@ class RolesHandler extends IGame {
         guildMember.removeRole(this.roles.MortLG.object).catch(() => true);
     }
 
-    assignRoles(configuration) {
-        return new Promise((resolve, reject) => {
+    async assignRoles(configuration) {
+        let participantArray = shuffle_array(Array.from(configuration.getParticipants().keys()));
 
-            let participantArray = shuffle_array(Array.from(configuration.getParticipants().keys()));
-            let promises = [];
+        while (participantArray.length > 0) {
 
-            participantArray.forEach(playerId => {
-                promises.push(this.assignRole(playerId, configuration));
-            });
+            let playerId = get_random_in_array(participantArray);
 
-            Promise.all(promises).then((players) => {
+            participantArray.splice(participantArray.indexOf(playerId), 1);
+            configuration.addPlayer(await this.assignRole(playerId, configuration));
 
-                players.forEach(player => {
-                    configuration.addPlayer(player);
-                });
+        }
 
-                resolve(configuration);
-
-            }).catch(err => reject(err))
-
-        });
+        return configuration;
     }
 
     getAdditionnalRoles(number) {

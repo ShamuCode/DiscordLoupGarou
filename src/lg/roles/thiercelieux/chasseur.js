@@ -12,50 +12,45 @@ class Chasseur extends Villageois {
         return this;
     }
 
-    die(GameConfiguration) {
-        return new Promise((resolve, reject) => {
+    async die(GameConfiguration) {
+        let targets = [];
 
-            let targets = [];
+        if (GameConfiguration.getAlivePlayers().length > 0) {
 
-            GameConfiguration.channelsHandler.sendMessageToVillage(
+            await GameConfiguration.channelsHandler.sendMessageToVillage(
                 `${this.member.displayName}, le Chasseur, est mort. Il va maintenant désigner une personne à emporter avec lui.`
-            )
-                .then(() => this.getDMChannel())
-                .then((dmChannel) => new EveryOneVote(
-                        "Qui voulez-vous emporter avec vous dans la mort ?",
-                        GameConfiguration,
-                        40000,
-                        dmChannel,
-                        1
-                    ).excludeDeadPlayers().runVote())
-                .then(outcome => {
+            );
+            let dmChannel = await this.getDMChannel();
 
-                    if (!outcome || outcome.length === 0) {
-                        targets.push(get_random_in_array(GameConfiguration.getAlivePlayers()));
-                    } else {
-                        targets.push(GameConfiguration.getPlayerById(outcome[0]));
-                    }
+            let outcome = await new EveryOneVote(
+                "Qui voulez-vous emporter avec vous dans la mort ?",
+                GameConfiguration,
+                40000,
+                dmChannel,
+                1
+            ).excludeDeadPlayers().runVote();
 
-                    this.dmChannel.send(`Vous avez choisi ${targets[0].member.displayName}`).catch(console.error);
+            if (!outcome || outcome.length === 0) {
+                targets.push(get_random_in_array(GameConfiguration.getAlivePlayers()));
+            } else {
+                targets.push(GameConfiguration.getPlayerById(outcome[0]));
+            }
 
-                    if (this.amoureux && GameConfiguration.getPlayerById(this.amoureux).alive) {
-                        targets.push(GameConfiguration.getPlayerById(this.amoureux));
-                    }
+            await this.dmChannel.send(`Vous avez choisi ${targets[0].member.displayName}`);
 
-                    return super.die(GameConfiguration);
+        }
 
-                })
-                .then(additionnalDeath => {
+        if (this.amoureux && GameConfiguration.getPlayerById(this.amoureux).alive) {
+            targets.push(GameConfiguration.getPlayerById(this.amoureux));
+        }
 
-                    if (additionnalDeath) {
-                        targets = targets.concat(additionnalDeath);
-                    }
-                    resolve(targets);
+        let additionnalDeath = await super.die(GameConfiguration);
 
-                })
-                .catch(err => reject(err));
+        if (additionnalDeath) {
+            targets = targets.concat(additionnalDeath);
+        }
 
-        });
+        return targets;
     }
 
 }

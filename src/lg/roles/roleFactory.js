@@ -1,4 +1,8 @@
 const basicRole = require("./baseRole");
+const Frere = require("./personnages/frereSoeurs").Frere;
+const Renard = require("./personnages/renard").Renard;
+const Soeur = require("./personnages/frereSoeurs").Soeur;
+const InfectPereDesLoups = require("./personnages/infectPereDesLoups").InfectPereDesLoups;
 const EnfantSauvage = require("./personnages/enfantSauvage").EnfantSauvage;
 const JoueurDeFlute = require("./nouvelle_lune/joueurDeFlute").JoueurDeFlute;
 const BoucEmissaire = require("./nouvelle_lune/boucEmissaire").BoucEmissaire;
@@ -47,7 +51,7 @@ class Create {
 
     static ange(guildMember, gameInfo) {
         return new Ange(guildMember, gameInfo);
-    }
+    }*/
 
     static infectPereDesLoups(guildMember, gameInfo) {
         return new InfectPereDesLoups(guildMember, gameInfo);
@@ -61,15 +65,15 @@ class Create {
         return new Renard(guildMember, gameInfo);
     }
 
-    static servanteDevouee(guildMember, gameInfo) {
+    /*static servanteDevouee(guildMember, gameInfo) {
         return new ServanteDevouee(guildMember, gameInfo);
-    }
+    }*/
 
     static frere(guildMember, gameInfo) {
         return new Frere(guildMember, gameInfo);
     }
 
-    static montreurOurs(guildMember, gameInfo) {
+    /*static montreurOurs(guildMember, gameInfo) {
         return new MontreurOurs(guildMember);
     }
 
@@ -103,10 +107,6 @@ class Create {
 
     static loupBlanc(guildMember, gameInfo) {
         return new LoupBlanc(guildMember, gameInfo);
-    }
-
-    static capitaine(guildMember, gameInfo) {
-        return new Capitaine(guildMember, gameInfo);
     }*/
 
     static chasseur(guildMember, gameInfo) {

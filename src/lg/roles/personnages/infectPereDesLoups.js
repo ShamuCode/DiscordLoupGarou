@@ -1,9 +1,15 @@
-let infectPereDesLoups = (client, message) => new Promise((resolve, reject) => {
-    resolve(null);
-});
+const LoupGarou = require("../baseRole").LoupGarou;
 
-module.exports = {
+class InfectPereDesLoups extends LoupGarou {
 
-    infectPereDesLoups
+    constructor(guildMember) {
+        super(guildMember);
 
-};
+        this.role = "InfectPereDesLoups";
+
+        return this;
+    }
+
+}
+
+module.exports = {InfectPereDesLoups};

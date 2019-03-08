@@ -1,9 +1,15 @@
-let renard = (client, message) => new Promise((resolve, reject) => {
-    resolve(null);
-});
+const Villageois = require("../baseRole").Villageois;
 
-module.exports = {
+class Renard extends Villageois {
 
-    renard
+    constructor(guildMember) {
+        super(guildMember);
 
-};
+        this.role = "Renard";
+
+        return this;
+    }
+
+}
+
+module.exports = {Renard};
