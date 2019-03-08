@@ -59,8 +59,8 @@ module.exports = {
 
                 let timeout = setInterval(() => {
                     if (getOccupiedGuilds(LGBot).length === 0) {
-                        clearInterval(timeout);
                         restartBot(message);
+                        clearInterval(timeout);
                     }
                 }, 1000 * 60)
 

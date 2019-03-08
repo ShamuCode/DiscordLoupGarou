@@ -78,7 +78,7 @@ class RolesHandler extends IGame {
         };
 
         this.role_conf = [
-            // Thiercelieux
+            // Thiercelieux 0, 5
             {
                 Voyante: 1,
                 Chasseur: 1,
@@ -88,7 +88,7 @@ class RolesHandler extends IGame {
                 Voleur: 1,
             },
             // !Thiercelieux
-            // Nouvelle lune
+            // Nouvelle lune [0, 1], 2, 5
             {
                 Salvateur: 1,
                 IdiotDuVillage: 1,
@@ -111,31 +111,40 @@ class RolesHandler extends IGame {
                 Frere: 3, // todo: si une carte soeur est donnée, il faut donner les autres. Si impossible de les donner, donner un autre rôle.
                 MontreurOurs: 1,
                 Comedien: 1,
-                AbominableSectaire: 1,
                 ChienLoup: 1,
                 VillageoisVillageois: 1,
                 Corbeau: 1,
                 GrandMechantLoup: 1,
                 JugeBegue: 1,
+                LoupBlanc: 1,
+            },
+            {
+                AbominableSectaire: 1,
+                Gitane: 1,
             },
             //!Personnages
             {
                 Villageois: Number.MAX_SAFE_INTEGER,
-                LoupGarou: Number.MAX_SAFE_INTEGER
             }
         ];
 
-        this.thiercelieux = [
-            this.role_conf[0], this.role_conf[1], this.role_conf[2], this.role_conf[3], this.role_conf[7]
-        ];
-
-        this.nouvelleLune = [
-            this.role_conf[0], this.role_conf[1], this.role_conf[4], this.role_conf[7]
-        ];
-
-        this.allExtension = this.thiercelieux;
-
-        this.gameType = this.thiercelieux;
+        if (this.gameOptions.extensions.thiercelieux) {
+            this.gameType = [
+                this.role_conf[0], this.role_conf[5]
+            ];
+        } else if (this.gameOptions.extensions.nouvelleLune) {
+            this.gameType = [
+                Object.assign(this.role_conf[0], this.role_conf[1]), this.role_conf[2], this.role_conf[5]
+            ];
+        } else if (this.gameOptions.extensions.personnage) {
+            this.gameType = [
+                this.role_conf[0], this.role_conf[5]
+            ];
+        } else {
+            this.gameType = [
+                this.role_conf[0], this.role_conf[5]
+            ];
+        }
 
         /**
          * @type {Array}
@@ -267,7 +276,12 @@ class RolesHandler extends IGame {
             let playerId = get_random_in_array(participantArray);
 
             participantArray.splice(participantArray.indexOf(playerId), 1);
-            configuration.addPlayer(await this.assignRole(playerId, configuration));
+
+            if (configuration.needsLG()) {
+                configuration.addPlayer(await this.assignRole(playerId, configuration, true));
+            } else {
+                configuration.addPlayer(await this.assignRole(playerId, configuration, false));
+            }
 
         }
 
@@ -306,28 +320,21 @@ class RolesHandler extends IGame {
         });
     }
 
-    assignRole(id, configuration) {
-        return new Promise((resolve, reject) => {
+    async assignRole(id, configuration, putLg) {
 
-            let found = false;
+        if (putLg) {
+            return this.factory.LoupGarou(configuration.getParticipants().get(id));
+        }
 
-            for (let i = 0; i < this.gameType.length; i++) {
+        for (let i = 0; i < this.gameType.length; i++) {
 
-                if (!this.roleComplete(this.gameType[i])) {
-                    this.setRole(configuration.getParticipants().get(id), i)
-                        .then((player) => resolve(player))
-                        .catch(err => reject(err));
-                    found = true;
-                    break;
-                }
-
+            if (!this.roleComplete(this.gameType[i])) {
+                return await this.setRole(configuration.getParticipants().get(id), i);
             }
 
-            if (found === false) {
-                reject(`No role found for ${configuration.getParticipants().get(id).displayName}`)
-            }
+        }
 
-        });
+        throw (`No role found for ${configuration.getParticipants().get(id).displayName}`)
     }
 
     roleComplete(roleVar) {

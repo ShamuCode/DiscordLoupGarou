@@ -35,6 +35,21 @@ class GameConfiguration {
 
     }
 
+    needsLG() {
+        let lgNb = 0;
+        let totalNb = 0;
+
+        for (let player of this._players.values()) {
+            if (player.team === "LG") {
+                lgNb += 1;
+            }
+            totalNb += 1;
+        }
+
+        return ((lgNb + 1) / totalNb) * 100 <= 25;
+
+    }
+
     get charmedPlayers() {
 
         let charmedPlayers = [];
