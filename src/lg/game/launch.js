@@ -2,7 +2,7 @@ const LoupGarou = require("../game/game");
 const getMusics = require('../../functions/googleSheets');
 const GameOptions = require("../game/options").GameOptions;
 const get_random_in_array = require("../../functions/parsing_functions").get_random_in_array;
-const SondageInfiniteChoice = require("../../functions/cmds/referendum").SondageInfiniteChoice;
+const SondageInfiniteChoice = require("../../functions/referendum").SondageInfiniteChoice;
 const RichEmbed = require('discord.js').RichEmbed;
 let botData = require("../../BotData.js");
 

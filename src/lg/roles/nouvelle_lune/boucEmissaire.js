@@ -12,6 +12,8 @@ class BoucEmissaire extends Villageois {
 
     async askIfWantsMore() {
 
+        let dmChannel = await this.getDMChannel();
+
     }
 
     async askTarget(configuration) {
@@ -19,18 +21,26 @@ class BoucEmissaire extends Villageois {
         let dmChannel = await this.getDMChannel();
 
         let outcome = await new EveryOneVote(
-            "Choisissez une personne qui pourra voter à la prochaine nuit",
+            "Choisissez les personnes qui pourront voter à la prochaine nuit",
             configuration,
             10000, dmChannel, 1
         ).excludeDeadPlayers().runVote([this.member.id]);
 
         if (!outcome || outcome.length === 0) {
             return null;
-        } else if (outcome.length === 1) {
+        } else {
 
             let target = configuration.getPlayerById(outcome[0]);
 
-            //todo: continue to develop boucEmissaire
+            if (!target) {
+                console.error("Guild member not found");
+                return null;
+            }
+
+            target.canVote = false;
+            target.cantVoteNextTurn = true;
+
+            return target;
 
         }
 

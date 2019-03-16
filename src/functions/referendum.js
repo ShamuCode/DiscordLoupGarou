@@ -1,8 +1,7 @@
-const referendumChannelId = "479635710069178370";
-const BotData = require("../../BotData.js");
-const ReactionHandler = require("../reactionHandler").ReactionHandler;
+const BotData = require("../BotData.js");
+const ReactionHandler = require("./reactionHandler").ReactionHandler;
 const RichEmbed = require("discord.js").RichEmbed;
-const Wait = require('../../functions/wait').Wait;
+const Wait = require('./wait').Wait;
 
 class Sondage {
 
@@ -198,21 +197,15 @@ class SondageInfiniteChoice {
     }
 
     getVoters() {
-        let i = 0;
         return Array.from(this.voters.keys()).map((element) => {
-            if (i === 1) {
-                if (element.displayName) return element.displayName;
-                else return element.username;
-            } else {
-                if (element.displayName) return ` ${element.displayName}`;
-                else return element.username;
-            }
-        });
+            if (element.displayName) return element.displayName;
+            else return element.username;
+        }).toString().replace(/,+/g, '\n');
     }
 
     updateDisplay() {
         this.embed.fields[2].value = this.getVoteData().toString();
-        this.embed.fields[4].value = this.getVoters().toString();
+        this.embed.fields[4].value = this.getVoters();
         this.msg.edit(this.embed).catch(() => true);
     }
 
@@ -222,7 +215,7 @@ class SondageInfiniteChoice {
         this.msg.edit(this.embed).catch(() => true);
     }
 
-    post() {
+    post(getResult) {
         return new Promise((resolve, reject) => {
 
             this.embed = this.embed
@@ -357,6 +350,17 @@ class SondageInfiniteChoice {
                         responseArray.push([c, this.choices.get(c)]);
                     });
 
+                    if (getResult) {
+
+                        let result = [];
+
+                        responseArray.forEach(choice => {
+                            result.push(choice[1].choice);
+                        });
+
+                        responseArray = result;
+                    }
+
                     resolve(responseArray);
 
                 }));
@@ -401,35 +405,4 @@ class SondageInfiniteChoice {
 
 }
 
-class Referendum {
-
-    constructor(question, discordClient, referendumAuthor, time) {
-        this.question = question;
-        this.client = discordClient;
-        this.author = referendumAuthor;
-        this.referendumChannel = this.client.channels.get(referendumChannelId);
-        this.time = time;
-    }
-
-    channelExists() {
-        return this.referendumChannel;
-    }
-
-    post() {
-        return new Promise((resolve, reject) => {
-            let referendum = new Sondage(
-                [this.question, "Oui", "Non"],
-                this.client,
-                this.referendumChannel,
-                this.time
-            );
-
-            referendum.post().then(() => {
-                resolve(true);
-            }).catch(err => reject(err));
-        });
-    }
-
-}
-
-module.exports = {Referendum, Sondage, SondageInfiniteChoice};
+module.exports = {Sondage, SondageInfiniteChoice};

@@ -120,7 +120,8 @@ class GameFlow extends IGame {
                 .setAuthor("Les Loups-garous de Thiercelieux [Beta v1.6]", lg_var.roles_img.LoupGarou)
                 .setTitle("Un jeu imaginé et conçu par Phillippe des Pallières et Hervé Marly")
                 .setDescription('Développé par Kazuhiro#1248.\n\n*Thiercelieux est un petit village rural d\'apparence paisible,' +
-                    ' mais chaque nuit certains villageois se transforment en loups-garou pour dévorer d\'autres villageois...*\n')
+                    ' mais chaque nuit certains villageois se transforment en loups-garou pour dévorer d\'autres villageois...*\n\n' +
+                    '[Cliquez ici](https://docs.google.com/spreadsheets/d/18-N7KfwYHyRIsKG06D_5tLIrpoLaeOm9WvS_RT79wfc/edit?usp=sharing) pour jouer avec vos musiques personnalisées')
                 .addField("Règles :",
                     'Les joueurs sont divisés en deux camps : les villageois (certains d\'entre eux jouant ' +
                     'un rôle spécial) et les loups-garou. Le but des villageois est de découvrir et d\'éliminer ' +

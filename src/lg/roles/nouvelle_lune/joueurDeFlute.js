@@ -1,4 +1,4 @@
-const SondageInfiniteChoice = require("../../../functions/cmds/referendum").SondageInfiniteChoice;
+const SondageInfiniteChoice = require("../../../functions/referendum").SondageInfiniteChoice;
 const Player = require("../baseRole").Player;
 let RichEmbed = require("discord.js").RichEmbed;
 const botData = require('../../../BotData');

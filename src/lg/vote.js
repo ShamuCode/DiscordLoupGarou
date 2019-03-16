@@ -1,4 +1,4 @@
-const SondageInfiniteChoice = require("../functions/cmds/referendum").SondageInfiniteChoice;
+const SondageInfiniteChoice = require("../functions/referendum").SondageInfiniteChoice;
 const CommunicationHandler = require("./communicationHandler").CommunicationHandler;
 
 class Vote {
