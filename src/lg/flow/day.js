@@ -4,6 +4,7 @@ const get_random_in_array = require("../../functions/parsing_functions").get_ran
 const EveryOneVote = require("../vote.js").EveryOneVote;
 let timeToString = require('../../functions/time');
 const Period = require("./period").Period;
+const CommunicationHandler = require('../communicationHandler').CommunicationHandler;
 
 class Day extends Period {
 
@@ -134,11 +135,33 @@ class Day extends Period {
         } else {
             let victim = this.GameConfiguration.getPlayerById(victimId);
 
-            await this.GameConfiguration.channelsHandler.sendMessageToVillage(
-                `Le village a souhaité la mort de **${victim.member.displayName}**, étant ${victim.role}`
-            );
+            if (victim.role === "IdiotDuVillage") {
 
-            return victim;
+                let msg = CommunicationHandler.getLGSampleMsg()
+                    .setDescription("L'idiot du village est gracié par le village, il reste donc en vie.");
+
+                victim.canBeCapitaine = false;
+
+                if (victim.capitaine) {
+                    msg.addField(
+                        `${victim.member.displayName} n'est plus maire`,
+                        "L'idiot du village étant visé par le village et assumant le rôle de capitaine, le capitaine perd ses fonctions."
+                    );
+                    victim.capitaine = false;
+                }
+
+                await this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.village_lg).send(msg);
+
+                return null;
+
+            } else {
+
+                await this.GameConfiguration.channelsHandler.sendMessageToVillage(
+                    `Le village a souhaité la mort de **${victim.member.displayName}**, étant ${victim.role}`
+                );
+
+                return victim;
+            }
         }
 
     }

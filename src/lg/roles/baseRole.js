@@ -11,6 +11,7 @@ class Player {
         this.gameinfo = null;
 
         this.capitaine = false;
+        this.canBeCapitaine = true;
         this.immunity = false;
         this.alive = true;
         this.canVote = true;
@@ -77,13 +78,17 @@ class Player {
             );
         }
 
+        let alivePlayers = configuration.getAlivePlayers();
         //si le capitaine meurt go réélire
-        if (this.capitaine && configuration.getAlivePlayers().length > 0) {
+        if (this.capitaine && alivePlayers.length > 0) {
             let dmChannel = await this.getDMChannel();
 
             await configuration.channelsHandler.sendMessageToVillage(
                 `${this.member.displayName}, le Capitaine, est mort(e), il va maintenant désigner son successeur`
             );
+
+            let exceptionArrayId = [this.member.id];
+            alivePlayers.forEach(player => {if (!player.canBeCapitaine) exceptionArrayId.push(player.member.id);});
 
             let outcome = await new EveryOneVote(
                 "Qui sera ton successeur ?",
@@ -91,7 +96,7 @@ class Player {
                 30000,
                 dmChannel,
                 1
-            ).excludeDeadPlayers().runVote([this.member.id]);
+            ).excludeDeadPlayers().runVote(exceptionArrayId);
 
             let newCapitaine = null;
 

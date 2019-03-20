@@ -13,7 +13,7 @@ class GamePreparation extends IGame {
         super(client);
 
         this.MAX_PLAYERS = 29;
-        this.MIN_PLAYERS = 4;
+        this.MIN_PLAYERS = 2;
 
         this.status = false;
 
