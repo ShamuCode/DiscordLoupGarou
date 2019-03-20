@@ -104,7 +104,9 @@ class Day extends Period {
                     "Il est donc éliminé, mais il lui reste une prérogative à exercer. Il va maintenant désigner qui votera ou ne votera pas durant la prochaine journée..."
                 );
 
-                victimId = await boucEmissaire.processRole(this.GameConfiguration);
+                await boucEmissaire.processRole(this.GameConfiguration);
+
+                victimId = boucEmissaire.member.id;
 
             } else {
 
