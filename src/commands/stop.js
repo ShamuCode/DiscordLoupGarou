@@ -1,7 +1,8 @@
 let botData = require("../BotData.js");
 
 module.exports = {
-    name: __filename.split('/').pop().split('.').shift(),
+    name: "stop",
+    guide: "stop",
     description: 'forcer la fin de partie',
     execute(LGBot, message) {
 

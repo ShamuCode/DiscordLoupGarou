@@ -1,3 +1,5 @@
+const botColor = require('../BotData').BotValues.botColor;
+
 const memberStatus = {
     online: "En Ligne",
     offline: "Invisible ou Hors Ligne",
@@ -600,7 +602,7 @@ const infinite_fill_roles = {
 
 module.exports = {
 
-    LGGameObject, MINUTE, death_sentence, bypass_roles, memberStatus, botColor,
+    MINUTE, death_sentence, bypass_roles, memberStatus, botColor,
     channel_reserved_roles, permission, roles_desc, infinite_fill_roles, roles_img
 
 };

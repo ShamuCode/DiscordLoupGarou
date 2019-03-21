@@ -38,7 +38,8 @@ let removeAdmins = (LGBot, message) => {
 };
 
 module.exports = {
-    name: `${__filename.split('/').pop().split('.').shift()} @Utilisateur1 @Utilisateur2 ...`,
+    name: "removeAdmin",
+    guide: `removeAdmin @Utilisateur1 @Utilisateur2 ...`,
     description: 'Supprimer des admins au bot LG, capables de stopper des parties de force. Il est nécessaire de mentionner pour sélectionner.',
     execute(LGBot, message) {
         removeAdmins(LGBot, message);

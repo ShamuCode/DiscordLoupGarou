@@ -3,7 +3,8 @@ let botData = require("../BotData.js");
 const fs = require('fs');
 
 module.exports = {
-    name: __filename.split('/').pop().split('.').shift(),
+    name: "help",
+    guide: "help",
     description: 'afficher ce message d\'aide',
     execute(LGBot, message) {
 
@@ -29,7 +30,7 @@ module.exports = {
                     .setTitle("Guide pour jouer");
             }
 
-            helpMsg.addField(`${botData.BotValues.botPrefix}${command.name}`, command.description);
+            helpMsg.addField(`${botData.BotValues.botPrefix}${command.guide}`, command.description);
 
             i++;
         }

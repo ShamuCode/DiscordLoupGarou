@@ -5,6 +5,7 @@ const VoiceHandler = require("../voice").VoiceHandler;
 const ChannelsHandler = require("../channel").ChannelsHandler;
 const RolesHandler = require("../roles/role").RolesHandler;
 const IGame = require("./interface").IGame;
+const GameConfiguration = require('./configuration').GameConfiguration;
 
 class GamePreparation extends IGame {
 

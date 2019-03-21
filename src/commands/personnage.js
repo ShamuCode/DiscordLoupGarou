@@ -1,5 +1,6 @@
 module.exports = {
-    name: __filename.split('/').pop().split('.').shift(),
+    name: "personnage",
+    guide: "personnage",
     description: 'Lancer une nouvelle partie de Loup Garou avec l\'extension Personnages',
     execute(LGBot, message) {
 

@@ -35,7 +35,8 @@ let addAdmins = (LGBot, message) => {
 };
 
 module.exports = {
-    name: `${__filename.split('/').pop().split('.').shift()} @Utilisateur1 @Utilisateur2 ...`,
+    name: "addAdmin",
+    guide: `addAdmin @Utilisateur1 @Utilisateur2 ...`,
     description: 'Ajouter des admins au bot LG, capables de stopper des parties de force. Il est nécessaire de mentionner pour sélectionner.',
     execute(LGBot, message) {
         addAdmins(LGBot, message);
