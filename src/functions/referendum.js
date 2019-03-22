@@ -220,7 +220,7 @@ class SondageInfiniteChoice {
 
             this.embed = this.embed
                 .setTitle(this.question)
-                .setDescription("Veuillez taper le nombre correspondant à votre choix avec la commande ```vote <!--suppress HtmlUnknownTag --><nombre>```")
+                .setDescription("Veuillez taper le nombre correspondant à votre choix avec la commande ```vote <nombre>```")
                 .addBlankField()
                 .addField("Choix", this.getChoiceList().toString(), true)
                 .addField("Votes", this.getVoteData().toString(), true)

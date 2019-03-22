@@ -1,6 +1,7 @@
 const BotData = require("../BotData");
 const lg_var = require("./variables");
 const IGame = require("./game/interface").IGame;
+const RichEmbed = require('discord.js').RichEmbed;
 
 class CommunicationHandler extends IGame {
 

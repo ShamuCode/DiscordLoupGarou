@@ -7,6 +7,8 @@ const Wait = require("../../functions/wait.js").Wait;
 const EventEmitter = require('events');
 const GlobalTimer = require("./timer").GlobalTimer;
 const IGame = require("../game/interface").IGame;
+const {Day, FirstDay} = require('./day');
+const {Night, FirstNight} = require('./night');
 
 class GameFlow extends IGame {
 

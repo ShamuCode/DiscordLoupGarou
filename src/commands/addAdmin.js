@@ -12,19 +12,19 @@ let addAdmins = (LGBot, message) => {
             Settings = LGBot.Settings.get(message.guild.id);
         }
 
-        Settings.Admins.push(message.mentions.members.array().map(member => member.id));
+        Settings.Admins = Settings.Admins.concat(message.mentions.members.array().map(member => member.id));
         Settings.Admins = [...new Set(Settings.Admins)];
 
         LGBot.Settings.set(message.guild.id, Settings);
 
+        let botAdmins = Settings.Admins
+            .filter(id => message.guild.members.get(id))
+            .map(id => `__${message.guild.members.get(id).displayName}__`);
+
         message.channel.send(new RichEmbed().setColor(botData.BotValues.botColor)
             .addField(
                 "Admins du bot LG pour le serveur " + message.guild.name,
-                Settings.Admins
-                    .filter(id => message.guild.members.get(id))
-                    .map(id => `__${message.guild.members.get(id).displayName}__`)
-                    .toString()
-                    .replace(/,+/g, "\n")
+                botAdmins ? botAdmins.toString().replace(/,+/g, "\n") : "Aucun admin"
             )
         ).catch(console.error);
 

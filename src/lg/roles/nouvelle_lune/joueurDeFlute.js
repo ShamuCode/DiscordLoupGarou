@@ -2,6 +2,7 @@ const SondageInfiniteChoice = require("../../../functions/referendum").SondageIn
 const Player = require("../baseRole").Player;
 let RichEmbed = require("discord.js").RichEmbed;
 const botData = require('../../../BotData');
+const EveryOneVote = require('../../vote').EveryOneVote;
 
 
 /**

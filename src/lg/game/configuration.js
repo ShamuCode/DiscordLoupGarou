@@ -46,6 +46,8 @@ class GameConfiguration {
             totalNb += 1;
         }
 
+        if (lgNb === 0) return true;
+
         return ((lgNb + 1) / totalNb) * 100 <= 25;
 
     }

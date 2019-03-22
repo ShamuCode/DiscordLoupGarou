@@ -22,7 +22,7 @@ LGBot.commands = new Discord.Collection();
 for (const file of fs.readdirSync('./src/commands')) {
     const command = require(`./commands/${file}`);
 
-    LGBot.commands.set(command.name, command);
+    LGBot.commands.set(command.name.toLowerCase(), command);
 }
 
 LGBot.on('ready', () => {
@@ -30,7 +30,7 @@ LGBot.on('ready', () => {
     console.info('The bot is ready.');
     console.info(`Connected to ${LGBot.guilds.size} servers, servicing ${LGBot.users.size} users.`);
 
-    LGBot.user.setActivity(`Lancez une partie avec ${BotData.BotValues.botPrefix}thiercelieux - Réalisé par Kazuhiro#1248`).catch(console.error);
+    LGBot.user.setActivity(`commencez par taper ${BotData.BotValues.botPrefix}help - Réalisé par Kazuhiro#1248`).catch(console.error);
 
     LGBot.voiceConnections.array().forEach(voiceConnection => {
         voiceConnection.disconnect();
