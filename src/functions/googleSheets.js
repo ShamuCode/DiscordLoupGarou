@@ -1,7 +1,6 @@
 // BEFORE RUNNING:
 const {google} = require('googleapis');
 let sheets = google.sheets('v4');
-const gSheet = require('../BotData').GoogleSheet;
 
 class Musics {
 
@@ -118,15 +117,6 @@ let getMusics = () => new Promise((resolve, reject) => {
 });
 
 function authorize(callback) {
-    // TODO: Change placeholder below to generate authentication credentials. See
-    // https://developers.google.com/sheets/quickstart/nodejs#step_3_set_up_the_sample
-    //
-    // Authorize using one of the following scopes:
-    //   'https://www.googleapis.com/auth/drive'
-    //   'https://www.googleapis.com/auth/drive.file'
-    //   'https://www.googleapis.com/auth/drive.readonly'
-    //   'https://www.googleapis.com/auth/spreadsheets'
-    //   'https://www.googleapis.com/auth/spreadsheets.readonly'
     let authClient = process.env.gsheetApiKey;
 
     if (authClient == null) {

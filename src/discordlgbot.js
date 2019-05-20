@@ -5,6 +5,7 @@ const Enmap = require('enmap');
 const EnmapLevel = require('enmap-level');
 
 const fs = require('graceful-fs');
+const connectToMysqlDB = require('./functions/database');
 
 const Settings = new EnmapLevel({name: "Settings"});
 LGBot.Settings = new Enmap({provider: Settings});
@@ -28,6 +29,8 @@ LGBot.on('ready', () => {
 
     console.info('The bot is ready.');
     console.info(`Connected to ${LGBot.guilds.size} servers, servicing ${LGBot.users.size} users.`);
+
+    connectToMysqlDB(LGBot).then(() => console.info('Mysql Database connected')).catch(console.error);
 
     LGBot.user.setActivity(`${process.env.botPrefix}help - Réalisé par Kazuhiro#1248 - https://gitlab.com/AmadeusSalieri/DiscordLoupGarou`).catch(console.error);
 

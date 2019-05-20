@@ -79,8 +79,7 @@ class Game extends IGame {
                 "Joueurs",
                 this.preparation.configuration
                     .getPlayerNames()
-                    .toString()
-                    .replace(/,+/g, '\n')
+                    .join('\n')
             )
         );
 

@@ -200,7 +200,7 @@ class SondageInfiniteChoice {
         return Array.from(this.voters.keys()).map((element) => {
             if (element.displayName) return element.displayName;
             else return element.username;
-        }).toString().replace(/,+/g, '\n');
+        }).join('\n');
     }
 
     updateDisplay() {
@@ -267,6 +267,7 @@ class SondageInfiniteChoice {
                         if (collectedVote.deletable) collectedVote.delete().catch(() => true);
 
                         if (isNaN(answer)) {
+                            // noinspection JSUnresolvedFunction
                             member.send("Veuillez envoyer un nombre").catch(console.error);
                             return;
                         }

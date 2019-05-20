@@ -149,7 +149,7 @@ class GameFlow extends IGame {
             )
             .addField(
                 "Table ronde",
-                this.GameConfiguration.getTable().map(member => member.displayName).toString().replace(/,+/g, '\n')
+                this.GameConfiguration.getTable().map(member => member.displayName).join('\n')
             );
 
         this.GameStatusMsg = await this.GameConfiguration.channelsHandler._channels
@@ -192,12 +192,12 @@ class GameFlow extends IGame {
         this.gameStats.addField(
             "Loups",
             `${this.GameConfiguration.getMemberteams("LG")
-                .toString().replace(/,+/g, '\n')}`,
+                .join('\n')}`,
             true
         ).addField(
             "Villageois",
             `${this.GameConfiguration.getMemberteams("VILLAGEOIS")
-                .toString().replace(/,+/g, '\n')}`,
+                .join('\n')}`,
             true
         );
 
@@ -205,7 +205,7 @@ class GameFlow extends IGame {
             this.gameStats.addField(
                 "Loup Blanc",
                 `${this.GameConfiguration.getMemberteams("LOUPBLANC")
-                    .toString().replace(/,+/g, '\n')}`,
+                    .join('\n')}`,
                 true
             )
         }

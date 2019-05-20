@@ -51,6 +51,7 @@ let askOptions = async (message, extension) => {
 
     gameOptions.musicMode = await askMusicMode(message);
 
+    // noinspection JSUnresolvedFunction
     await message.channel.send(new RichEmbed().setColor(botData.BotValues.botColor)
         .setTitle(`Musiques utilisées : ${gameOptions.musicMode.name}`));
 

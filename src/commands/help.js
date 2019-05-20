@@ -22,6 +22,7 @@ module.exports = {
             const command = require(`./${file}`);
 
             if (i === 25) {
+                // noinspection JSUnresolvedFunction
                 message.channel.send(helpMsg).catch(console.error);
                 i = 0;
                 helpMsg = new RichEmbed()
@@ -35,6 +36,7 @@ module.exports = {
             i++;
         }
 
+        // noinspection JSUnresolvedFunction
         message.channel.send(helpMsg).catch(console.error);
     },
 };
