@@ -238,7 +238,7 @@ class SondageInfiniteChoice {
                     this.updateTimer();
                 }, 5000);
 
-                const vote = this.channel.createMessageCollector(m => m.author.id !== BotData.BotValues.botId, {time: this.time});
+                const vote = this.channel.createMessageCollector(m => m.author.id !== process.env.botId, {time: this.time});
 
                 vote.on("collect", collectedVote => {
 

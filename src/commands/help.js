@@ -30,7 +30,7 @@ module.exports = {
                     .setTitle("Guide pour jouer");
             }
 
-            helpMsg.addField(`${botData.BotValues.botPrefix}${command.guide}`, command.description);
+            helpMsg.addField(`${process.env.botPrefix}${command.guide}`, command.description);
 
             i++;
         }

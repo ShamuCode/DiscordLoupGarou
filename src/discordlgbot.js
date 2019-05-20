@@ -5,7 +5,6 @@ const Enmap = require('enmap');
 const EnmapLevel = require('enmap-level');
 
 const fs = require('graceful-fs');
-const BotData = require("./BotData");
 
 const Settings = new EnmapLevel({name: "Settings"});
 LGBot.Settings = new Enmap({provider: Settings});
@@ -30,7 +29,7 @@ LGBot.on('ready', () => {
     console.info('The bot is ready.');
     console.info(`Connected to ${LGBot.guilds.size} servers, servicing ${LGBot.users.size} users.`);
 
-    LGBot.user.setActivity(`commencez par taper ${BotData.BotValues.botPrefix}help - Réalisé par Kazuhiro#1248`).catch(console.error);
+    LGBot.user.setActivity(`${process.env.botPrefix}help - Réalisé par Kazuhiro#1248 - https://gitlab.com/AmadeusSalieri/DiscordLoupGarou`).catch(console.error);
 
     LGBot.voiceConnections.array().forEach(voiceConnection => {
         voiceConnection.disconnect();
@@ -79,10 +78,10 @@ LGBot.on('message', message => {
 
     if (message.author.bot) return;
 
-    const args = message.content.slice(BotData.BotValues.botPrefix.length).trim().split(/ +/g);
+    const args = message.content.slice(process.env.botPrefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if (!message.content.startsWith(BotData.BotValues.botPrefix)) {
+    if (!message.content.startsWith(process.env.botPrefix)) {
         return;
     }
 
@@ -92,11 +91,11 @@ LGBot.on('message', message => {
         LGBot.commands.get(command).execute(LGBot, message, args);
     } catch (error) {
         console.error(error);
-        message.reply('une erreur s\'est produite pendant l\'exécution de cette commande !');
+        message.reply('une erreur s\'est produite pendant l\'exécution de cette commande !').catch(console.error);
     }
 
 });
 
-LGBot.login(BotData.BotValues.botToken).then(() => {
+LGBot.login(process.env.botToken).then(() => {
     console.log('Logged in');
 }).catch(console.error);

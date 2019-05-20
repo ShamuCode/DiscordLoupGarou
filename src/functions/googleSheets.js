@@ -96,10 +96,10 @@ let getMusics = () => new Promise((resolve, reject) => {
     authorize(function (authClient) {
         let request = {
             // The ID of the spreadsheet to retrieve data from.
-            spreadsheetId: gSheet.spreadsheetId,  // TODO: Update placeholder value.
+            spreadsheetId: process.env.gsheetSpreadSheetId,
 
             // The A1 notation of the values to retrieve.
-            range: 'A1:Z60',  // TODO: Update placeholder value.
+            range: 'A1:Z60',
 
             auth: authClient,
         };
@@ -127,7 +127,7 @@ function authorize(callback) {
     //   'https://www.googleapis.com/auth/drive.readonly'
     //   'https://www.googleapis.com/auth/spreadsheets'
     //   'https://www.googleapis.com/auth/spreadsheets.readonly'
-    let authClient = gSheet.apiKey;
+    let authClient = process.env.gsheetApiKey;
 
     if (authClient == null) {
         console.log('authentication failed');
