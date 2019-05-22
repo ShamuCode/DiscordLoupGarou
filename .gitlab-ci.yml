@@ -30,7 +30,9 @@ build:
 
 testing_testing:
   stage: test
-  script: npm test
+  script:
+    - npm install
+    - npm test
 
 code_quality:
   stage: test
