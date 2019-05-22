@@ -23,7 +23,8 @@
     "run": "pm2 src/discordlgbot.js",
     "restart": "pm2 discordlgbot restart",
     "stop": "pm2 discordlgbot stop",
-    "delete": "pm2 delete discordlgbot"
+    "delete": "pm2 delete discordlgbot",
+    "test": "mocha"
   },
   "contributors": [
     {
