@@ -119,7 +119,7 @@ class GameFlow extends IGame {
 
         this.initMsg = await this.GameConfiguration.channelsHandler._channels.get(this.GameConfiguration.channelsHandler.channels.thiercelieux_lg)
             .send(new RichEmbed().setColor(BotData.BotValues.botColor)
-                .setAuthor("Les Loups-garous de Thiercelieux [Beta v1.6]", lg_var.roles_img.LoupGarou)
+                .setAuthor("Les Loups-garous de Thiercelieux [Beta v1.7]", lg_var.roles_img.LoupGarou)
                 .setTitle("Un jeu imaginé et conçu par Phillippe des Pallières et Hervé Marly")
                 .setDescription('Développé par Kazuhiro#1248.\n\n*Thiercelieux est un petit village rural d\'apparence paisible,' +
                     ' mais chaque nuit certains villageois se transforment en loups-garou pour dévorer d\'autres villageois...*\n\n' +
@@ -145,7 +145,7 @@ class GameFlow extends IGame {
         this.GameStatusEmbed
             .addField(
                 "Configuration de la partie",
-                this.GameConfiguration.toString()
+                this.GameConfiguration.toStr()
             )
             .addField(
                 "Table ronde",
@@ -172,7 +172,7 @@ class GameFlow extends IGame {
 
     async updateGameStatusMsg() {
         if (this.GameStatusMsg && this.GameStatusEmbed) {
-            this.GameStatusEmbed.fields[0].value = this.GameConfiguration.toString();
+            this.GameStatusEmbed.fields[0].value = this.GameConfiguration.toStr();
             await this.GameStatusMsg.edit(this.GameStatusEmbed);
         }
     }
@@ -336,7 +336,7 @@ class GameFlow extends IGame {
 
         }
 
-        LgLogger.info(`Game ended: ${gameHasEnded} | ${this.GameConfiguration.toString()}`, this.gameInfo);
+        LgLogger.info(`Game ended: ${gameHasEnded} | ${this.GameConfiguration.toStr()}`, this.gameInfo);
 
         return gameHasEnded;
     }

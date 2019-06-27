@@ -19,13 +19,13 @@ class GameConfiguration {
 
     }
 
-    toString() {
+    toStr() {
 
         let msg = 'Configuration du jeu\n\n';
 
         let conf = this.getRoleMap({alive: true, dead: false});
 
-        for (let [role, playerArray] of conf.entries()) {
+        for (let [role, playerArray] of conf.entries().shuffle()) {
 
             msg += `__${role}__ : **${playerArray.length}**\n`;
 

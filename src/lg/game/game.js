@@ -67,7 +67,6 @@ class Game extends IGame {
 
         await this.flow.GameConfiguration.voiceHandler.join();
         await this.flow.GameConfiguration.voiceHandler.setupEvents();
-        await this.flow.GameConfiguration.voiceHandler.playFirstDayBGM();
 
         LgLogger.info("Game successfully prepared.", this.gameInfo);
 
@@ -121,6 +120,9 @@ class Game extends IGame {
         this.msg = this.preparation.msg;
         this.flow.msg = this.preparation.msg;
         this.flow.GameConfiguration = configuration;
+
+        this.flow.GameConfiguration._players = this.flow.GameConfiguration._players.getShuffled();
+        this.flow.GameConfiguration._participants = this.flow.GameConfiguration._participants.getShuffled();
     }
 
     listenQuitEvents() {

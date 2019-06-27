@@ -24,7 +24,7 @@
     "restart": "pm2 discordlgbot restart",
     "stop": "pm2 discordlgbot stop",
     "delete": "pm2 delete discordlgbot",
-    "test": "mocha"
+    "test": "mocha --exit --recursive --timeout 10000"
   },
   "contributors": [
     {

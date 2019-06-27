@@ -1,104 +1,109 @@
 const Discord = require('discord.js');
-const LGBot = new Discord.Client();
-
-const Enmap = require('enmap');
-const EnmapLevel = require('enmap-level');
-
 const fs = require('graceful-fs');
-const connectToMysqlDB = require('./functions/database');
 
-const Settings = new EnmapLevel({name: "Settings"});
-LGBot.Settings = new Enmap({provider: Settings});
+class DiscordLGBot extends Discord.Client {
 
-const LG = new EnmapLevel({name: "LG"});
-LGBot.LG = new Enmap({provider: LG});
+    constructor() {
+        super();
 
-const userStat = new EnmapLevel({name: "userStat"});
-LGBot.userStat = new Enmap({provider: userStat});
+        this.initializeCommands();
 
-LGBot.commands = new Discord.Collection();
+        this.on('ready', this.onReady);
+        this.on('error', err => console.error(err));
+        this.on('disconnect', event => console.error(event));
+        this.on('resume', nb => console.info(`Connection resumed. Replayed: ${nb}`));
+        this.on('message', this.onMessage);
 
-// noinspection JSUnresolvedFunction
-for (const file of fs.readdirSync('./src/commands')) {
-    const command = require(`./commands/${file}`);
+        this.login(process.env.botToken).then(() => console.log('Logged in')).catch(console.error);
 
-    LGBot.commands.set(command.name.toLowerCase(), command);
-}
+        return this;
+    }
 
-LGBot.on('ready', () => {
+    initializeCommands() {
+        this.commands = new Discord.Collection();
 
-    console.info('The bot is ready.');
-    console.info(`Connected to ${LGBot.guilds.size} servers, servicing ${LGBot.users.size} users.`);
+        for (const file of fs.readdirSync('./src/commands')) {
+            const command = require(`./commands/${file}`);
+            this.commands.set(command.name.toLowerCase(), command);
+        }
+    }
 
-    connectToMysqlDB(LGBot).then(() => console.info('Mysql Database connected')).catch(console.error);
+    initializeDatabases() {
+        const connectToMysqlDB = require('./functions/database');
+        const Enmap = require('enmap');
+        const EnmapLevel = require('enmap-level');
+        const Settings = new EnmapLevel({name: "Settings"});
+        this.Settings = new Enmap({provider: Settings});
+        const LG = new EnmapLevel({name: "LG"});
+        this.LG = new Enmap({provider: LG});
+        const userStat = new EnmapLevel({name: "userStat"});
+        this.userStat = new Enmap({provider: userStat});
 
-    LGBot.user.setActivity(`${process.env.botPrefix}help - Réalisé par Kazuhiro#1248 - https://gitlab.com/AmadeusSalieri/DiscordLoupGarou`).catch(console.error);
+        connectToMysqlDB(this).then(() => console.info('Mysql Database connected')).catch(console.error);
 
-    LGBot.voiceConnections.array().forEach(voiceConnection => {
-        voiceConnection.disconnect();
-    });
+        return this;
+    }
 
-    //const msg = LGBot.Settings.get("RestartMsg");
+    onReady() {
+        console.info('The bot is ready.');
+        console.info(`Connected to ${this.guilds.size} servers, servicing ${this.users.size} users.`);
 
-    /*if (msg && msg.length > 0) {
+        this.initializeDatabases();
 
-        if (LGBot.Settings.Admins) {
-            LGBot.Settings.Admins.forEach(adminID => {
-                let user = LGBot.users.get(adminID);
+        this.user.setActivity(`${process.env.botPrefix}help - Réalisé par Kazuhiro#1248 - https://gitlab.com/AmadeusSalieri/DiscordLoupGarou`).catch(console.error);
 
-                if (user) user.send('Le bot Loup Garou a redémarré. ' + msg).catch(console.error);
-            });
-        } else {
-            LGBot.Settings.Admins = [];
+        this.voiceConnections.array().forEach(voiceConnection => {
+            voiceConnection.disconnect();
+        });
 
-            LGBot.guilds.array().forEach(guild => {
-                LGBot.Settings.Admins.push(guild.ownerID);
+        //const msg = LGBot.Settings.get("RestartMsg");
 
-                let user = LGBot.users.get(guild.ownerID);
+        /*if (msg && msg.length > 0) {
 
-                if (user) user.send('Le bot Loup Garou vient de redémarrer. ' + msg).catch(console.error);
+            if (LGBot.Settings.Admins) {
+                LGBot.Settings.Admins.forEach(adminID => {
+                    let user = LGBot.users.get(adminID);
 
-            });
+                    if (user) user.send('Le bot Loup Garou a redémarré. ' + msg).catch(console.error);
+                });
+            } else {
+                LGBot.Settings.Admins = [];
+
+                LGBot.guilds.array().forEach(guild => {
+                    LGBot.Settings.Admins.push(guild.ownerID);
+
+                    let user = LGBot.users.get(guild.ownerID);
+
+                    if (user) user.send('Le bot Loup Garou vient de redémarrer. ' + msg).catch(console.error);
+
+                });
+            }
+
+        }*/
+    }
+
+    onMessage(message) {
+        if (message.author.bot) return;
+
+        const args = message.content.slice(process.env.botPrefix.length).trim().split(/ +/g);
+        const command = args.shift().toLowerCase();
+
+        if (!message.content.startsWith(process.env.botPrefix)) {
+            return;
         }
 
-    }*/
+        if (!this.commands.has(command)) return;
 
-});
-
-LGBot.on('error', err => {
-    console.error(err);
-});
-
-LGBot.on('disconnect', event => {
-    console.error(event);
-});
-
-LGBot.on('resume', nb => {
-    console.info(`Connection resumed. Replayed: ${nb}`);
-});
-
-LGBot.on('message', message => {
-
-    if (message.author.bot) return;
-
-    const args = message.content.slice(process.env.botPrefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-
-    if (!message.content.startsWith(process.env.botPrefix)) {
-        return;
+        try {
+            this.commands.get(command).execute(this, message, args);
+        } catch (error) {
+            console.error(error);
+            message.reply('une erreur s\'est produite pendant l\'exécution de cette commande !').catch(console.error);
+        }
     }
 
-    if (!LGBot.commands.has(command)) return;
+}
 
-    try {
-        LGBot.commands.get(command).execute(LGBot, message, args);
-    } catch (error) {
-        console.error(error);
-        message.reply('une erreur s\'est produite pendant l\'exécution de cette commande !').catch(console.error);
-    }
+new DiscordLGBot();
 
-});
-
-LGBot.login(process.env.botToken).then(() => {
-    console.log('Logged in');
-}).catch(console.error);
+require('./utils/utils');

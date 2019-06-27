@@ -28,7 +28,7 @@ build:
     - tags
 
 
-testing_testing:
+test:
   stage: test
   script:
     - npm install
