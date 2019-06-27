@@ -31,7 +31,7 @@ build:
 test:
   stage: test
   script:
-    - npm install
+    - sudo npm install
     - npm test
 
 code_quality:
